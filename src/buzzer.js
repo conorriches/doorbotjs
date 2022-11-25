@@ -10,7 +10,7 @@ export default class Buzzer {
 
   beep() {
     this.buzzer.write(1, () => {
-      setTimeout(this.duration, () => this.buzzer.write(0));
+      setTimeout(() => this.buzzer.write(0), this.duration);
     });
   }
 }

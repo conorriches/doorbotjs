@@ -16,14 +16,14 @@ import Keypad from "./src/keypad.js";
 import Buzzer from "./src/buzzer.js";
 import Lock from "./src/lock.js";
 import Telegram from "./src/telegram.js";
-import Logger from "./src/logger.js"
+import Logger from "./src/logger.js";
 
 /**
  * Set up audit log
  * This logs to level INFO only - e.g. entry logs are recorded to a rotating log
  * ERROR logs are managed my PM2 as this will include the whole program crashing
  */
-const logger = new Logger()
+const logger = new Logger();
 
 /**
  * Log that we have life
@@ -76,7 +76,7 @@ const p_buzz_outside = 18; // Small beeper behind keypad.
 const p_buzz_inside = 8; // Small beeper inside the control case.
 
 // Led status - uses *** BCM mode ***
-const p_led_error = 5; 
+const p_led_error = 5;
 const p_led_run = 7;
 
 /**
@@ -102,8 +102,16 @@ const gpio_led_run = new Gpio(p_led_run, "out");
  */
 const buzzer_inside = new Buzzer(p_buzz_inside, 100);
 const buzzer_outside = new Buzzer(p_buzz_outside);
-const lock = new Lock({ gpio: gpio_relay_1, failsafe: config.get("locks.gate.failsafe"), duration: config.get("locks.gate.duration") });
-const strike = new Lock({ gpio: gpio_relay_2, failsafe: config.get("locks.gate.failsafe"), duration: config.get("locks.strike.duration") });
+const lock = new Lock({
+  gpio: gpio_relay_1,
+  failsafe: config.get("locks.gate.failsafe"),
+  duration: config.get("locks.gate.duration"),
+});
+const strike = new Lock({
+  gpio: gpio_relay_2,
+  failsafe: config.get("locks.gate.failsafe"),
+  duration: config.get("locks.strike.duration"),
+});
 const keypad = new Keypad({
   rowPins: [p_keypad_r1, p_keypad_r2, p_keypad_r3, p_keypad_r4],
   colPins: [p_keypad_c1, p_keypad_c2, p_keypad_c3],
@@ -162,11 +170,10 @@ const validate = (entryCode) => {
     lock.trigger();
     strike.trigger();
     gpio_rfid_led.write(1);
-    setTimeout(3000, () => gpio_rfid_led.write(0));
-
+    setTimeout(() => gpio_rfid_led.write(0), 3000);
   } else {
     gpio_rfid_beep.write(1);
-    setTimeout(3000, () => gpio_rfid_beep.write(0));
+    setTimeout(() => gpio_rfid_beep.write(0), 3000);
   }
 };
 
@@ -180,7 +187,6 @@ const requestToExit = () => {
   logger.info({ action: "REX", message: "A request to exit was made" });
   lock.trigger();
 };
-
 
 /**
  * Update LED status on front panel

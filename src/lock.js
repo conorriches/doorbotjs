@@ -2,7 +2,7 @@
 
 export default class Lock {
   constructor({ gpio, failsafe = false, duration = 50 }) {
-    this.lock = gpio
+    this.lock = gpio;
     this.failsafe = !!failsafe;
     this.duration = parseInt(duration);
   }
@@ -25,6 +25,6 @@ export default class Lock {
 
   trigger() {
     this.unset();
-    setTimeout(this.duration, () => this.set());
+    setTimeout(() => this.set(), this.duration);
   }
 }

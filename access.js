@@ -187,7 +187,7 @@ const requestToExit = () => {
  * RUN led blinks every second, to show life
  * ERROR led illuminates on the presence of an error log
  */
-setInterval(1000, () => {
+setInterval(() => {
   const d = new Date();
   const seconds = d.getSeconds();
 
@@ -199,4 +199,4 @@ setInterval(1000, () => {
       buzzer_inside.beep();
     }
   });
-});
+}, 1000);

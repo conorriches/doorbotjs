@@ -102,8 +102,8 @@ const gpio_led_run = new Gpio(p_led_run, "out");
  */
 const buzzer_inside = new Buzzer(p_buzz_inside, 100);
 const buzzer_outside = new Buzzer(p_buzz_outside);
-const lock = new Lock({ pin: gpio_relay_1, failsafe: config.get("locks.gate.failsafe"), duration: config.get("locks.gate.duration") });
-const strike = new Lock({ pin: gpio_relay_2, failsafe: config.get("locks.gate.failsafe"), duration: config.get("locks.strike.duration") });
+const lock = new Lock({ gpio: gpio_relay_1, failsafe: config.get("locks.gate.failsafe"), duration: config.get("locks.gate.duration") });
+const strike = new Lock({ gpio: gpio_relay_2, failsafe: config.get("locks.gate.failsafe"), duration: config.get("locks.strike.duration") });
 const keypad = new Keypad({
   rowPins: [p_keypad_r1, p_keypad_r2, p_keypad_r3, p_keypad_r4],
   colPins: [p_keypad_c1, p_keypad_c2, p_keypad_c3],

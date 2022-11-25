@@ -1,10 +1,8 @@
 "use strict";
 
-import { Gpio } from "onoff";
-
 export default class Lock {
-  constructor({ pin, failsafe = false, duration = 50 }) {
-    this.lock = new Gpio(pin, "out");
+  constructor({ gpio, failsafe = false, duration = 50 }) {
+    this.lock = gpio
     this.failsafe = !!failsafe;
     this.duration = parseInt(duration);
   }

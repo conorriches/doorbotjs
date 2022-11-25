@@ -199,9 +199,9 @@ setInterval(() => {
 
   gpio_led_run.write(seconds % 2);
 
-  fs.access("logs/error/access.log", fs.F_OK, (err) => {
-    gpio_led_error.write(err ? 1 : 0);
-    if (seconds % 30 == 0) {
+  fs.access("logs/error/access.log", fs.F_OK, (errReadingErrLog) => {
+    gpio_led_error.write(errReadingErrLog ? 0 : 1);
+    if (!errReadingErrLog && seconds % 30 == 0) {
       buzzer_inside.beep();
     }
   });

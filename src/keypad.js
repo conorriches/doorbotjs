@@ -35,7 +35,7 @@ export default class Keypad {
     setInterval(this.checkTimeout, 500);
   }
 
-  keyPressed() {
+  keyPressed(key) {
     this.beep();
 
     if (key === "#") {

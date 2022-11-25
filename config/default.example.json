@@ -1,0 +1,19 @@
+{
+  "locks": {
+    "gate": {
+      "duration": 500,
+      "failsafe": false
+    },
+    "strike": {
+      "duration": 10000,
+      "failsafe": false
+    }
+  },
+  "telegram": {
+    "apikey": "",
+    "chatid": ""
+  },
+  "members": {
+    "querykey": ""
+  }
+}

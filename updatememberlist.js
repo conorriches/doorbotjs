@@ -51,7 +51,7 @@ const verifyFile = () => {
     if (data.length == 0) {
       logger.info({
         action: "DOWNLOAD",
-        message: "Memberlist length was 0 (incorrect AI key?)",
+        message: "Memberlist length was 0 (incorrect API key?)",
       });
       return;
     }

@@ -87,10 +87,10 @@ const p_led_run = 7;
 const gpio_relay_1 = new Gpio(p_relay_1, "out");
 const gpio_relay_2 = new Gpio(p_relay_2, "out");
 const gpio_doorbell = new Gpio(p_input_doorbell, "in", "rising", {
-  debounceTimeout: 100,
+  debounceTimeout: 1000,
 });
 const gpio_rex = new Gpio(p_input_rex, "in", "rising", {
-  debounceTimeout: 100,
+  debounceTimeout: 1000,
 });
 const gpio_rfid_beep = new Gpio(p_rfid_beep, "out");
 const gpio_rfid_led = new Gpio(p_rfid_led, "out");
@@ -115,13 +115,13 @@ const strike = new Lock({
 const keypad = new Keypad({
   rowPins: [p_keypad_r1, p_keypad_r2, p_keypad_r3, p_keypad_r4],
   colPins: [p_keypad_c1, p_keypad_c2, p_keypad_c3],
-  validateCallback: () => validate,
+  validateCallback: (code) => validate(code),
   beepCallback: () => buzzer_outside.beep(), // TODO: not fucking this
 });
 const fobReader = new Wiegand({
   d0: p_rfid_d0,
   d1: p_rfid_d1,
-  validateCallback: () => validate,
+  validateCallback: (code) => validate(code),
 });
 
 /**

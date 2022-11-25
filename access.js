@@ -107,13 +107,13 @@ const strike = new Lock({ gpio: gpio_relay_2, failsafe: config.get("locks.gate.f
 const keypad = new Keypad({
   rowPins: [p_keypad_r1, p_keypad_r2, p_keypad_r3, p_keypad_r4],
   colPins: [p_keypad_c1, p_keypad_c2, p_keypad_c3],
-  validateCallback: validate,
-  beepCallback: beep,
+  validateCallback: () => validate,
+  beepCallback: () => buzzer_outside.beep(), // TODO: not fucking this
 });
 const fobReader = new Wiegand({
   d0: p_rfid_d0,
   d1: p_rfid_d1,
-  validateCallback: validate,
+  validateCallback: () => validate,
 });
 
 /**
@@ -181,12 +181,6 @@ const requestToExit = () => {
   lock.trigger();
 };
 
-/**
- * Gives a pip on the outside keypad
- */
-const keypadBeep = () => {
-  buzzer_outside.beep();
-}
 
 /**
  * Update LED status on front panel

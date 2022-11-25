@@ -32,7 +32,7 @@ export default class Keypad {
       this.keyPressed(key);
     });
 
-    setInterval(500, this.checkTimeout());
+    setInterval(this.checkTimeout(), 500);
   }
 
   keyPressed() {

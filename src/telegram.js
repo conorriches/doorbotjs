@@ -41,11 +41,7 @@ export default class Telegram {
   }
 
   announceStartup() {
-    this.bot
-      .sendMessage(this.chatId, "🤖 The doorbot was started!")
-      .then((msg) => {
-        console.log(msg);
-      });
+    this.bot.sendMessage(this.chatId, "🤖 The doorbot was started!");
   }
 
   announceError() {

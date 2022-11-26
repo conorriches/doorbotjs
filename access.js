@@ -69,12 +69,11 @@ const p_rfid_beep = 24; // This beeper is louder but can't be used in short burs
 const p_rfid_led = 25; // Inbuilt fob reader LED. Red when low, Green when high.
 
 // Auxiliary - uses *** BCM mode ***
-const p_relay_1 = 14; // To gate lock (short release)
-const p_relay_2 = 15; // To strike lock (long release) (for future)
+const p_relay_1 = 8; // To gate lock (short release)
+const p_relay_2 = 9; // To strike lock (long release) (for future)
 const p_input_doorbell = 4;
 const p_input_rex = 27; // Request To Exit
 const p_buzz_outside = 18; // Small beeper behind keypad.
-const p_buzz_inside = 8; // Small beeper inside the control case.
 
 // Led status - uses *** BCM mode ***
 const p_led_error = 5;
@@ -101,7 +100,6 @@ const gpio_led_run = new Gpio(p_led_run, "out");
 /**
  * Instantiate Items
  */
-const buzzer_inside = new Buzzer(p_buzz_inside, 100);
 const buzzer_outside = new Buzzer(p_buzz_outside);
 const lock = new Lock({
   gpio: gpio_relay_1,
@@ -120,8 +118,8 @@ const keypad = new Keypad({
   beepCallback: () => buzzer_outside.beep(), // TODO: not fucking this
 });
 const fobReader = new Wiegand({
-  d0: p_rfid_d0,
-  d1: p_rfid_d1,
+  pinD0: p_rfid_d0,
+  pinD1: p_rfid_d1,
   validateCallback: (code) => validate({ entryCode: code, isKeycode: false }),
 });
 
@@ -276,8 +274,17 @@ setInterval(() => {
 
   fs.access("logs/error/access.log", fs.F_OK, (errReadingErrLog) => {
     gpio_led_error.write(errReadingErrLog ? 0 : flash);
-    if (!errReadingErrLog && seconds % 30 == 0) {
-      buzzer_inside.beep();
-    }
   });
 }, 1000);
+
+
+process.on('SIGINT', _ => {
+  gpio_doorbell.unexport();
+  gpio_led_error.unexport();
+  gpio_led_run.unexport();
+  gpio_relay_1.unexport();
+  gpio_relay_2.unexport();
+  gpio_rex.unexport();
+  gpio_rfid_beep.unexport();
+  gpio_rfid_led.unexport();
+});

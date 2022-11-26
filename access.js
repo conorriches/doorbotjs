@@ -20,6 +20,39 @@ import Telegram from "./src/telegram.js";
 import Logger from "./src/logger.js";
 
 /**
+ * Pin Numbers!
+ * Specify here where each thing is connected to.
+ * IMPORTANT - NOTE whether it's a board pin number, or BCM pin number. lol.
+ */
+
+// Keypad - the keypad library uses *** BOARD mode ***
+const p_keypad_r1 = 40;
+const p_keypad_r2 = 37;
+const p_keypad_r3 = 38;
+const p_keypad_r4 = 35;
+const p_keypad_c1 = 36;
+const p_keypad_c2 = 33;
+const p_keypad_c3 = 32;
+
+// Fob Reader - the Wiegand library uses *** BCM mode ***
+const p_rfid_d0 = 22;
+const p_rfid_d1 = 23;
+const p_rfid_beep = 24; // This beeper is loud but can't be used in short bursts
+const p_rfid_led = 25; // Inbuilt fob reader LED. Red when low, Green when high.
+
+// Auxiliary - uses *** BCM mode ***
+const p_relay_1 = 8; // To gate lock (short release)
+const p_relay_2 = 9; // To strike lock (long release) (for future)
+const p_input_doorbell = 4;
+const p_input_rex = 27; // Request To Exit
+const p_buzz_outside = 18; // Small beeper behind keypad.
+
+// Led status - uses *** BCM mode ***
+const p_led_error = 5;
+const p_led_run = 7;
+
+
+/**
  * Set up audit log
  * This logs to level INFO only - e.g. entry logs are recorded to a rotating log
  * ERROR logs are managed my PM2 as this will include the whole program crashing
@@ -47,37 +80,6 @@ const telegram = new Telegram({
 });
 telegram.announceStartup();
 
-/**
- * Pin Numbers!
- * Specify here where each thing is connected to.
- * IMPORTANT - NOTE whether it's a board pin number, or BCM pin number. lol.
- */
-
-// Keypad - the keypad library uses *** BOARD mode ***
-const p_keypad_r1 = 40;
-const p_keypad_r2 = 37;
-const p_keypad_r3 = 38;
-const p_keypad_r4 = 35;
-const p_keypad_c1 = 36;
-const p_keypad_c2 = 33;
-const p_keypad_c3 = 32;
-
-// Fob Reader - the Wiegand library uses *** BCM mode ***
-const p_rfid_d0 = 22;
-const p_rfid_d1 = 23;
-const p_rfid_beep = 24; // This beeper is louder but can't be used in short bursts, so not usable for the keypad.
-const p_rfid_led = 25; // Inbuilt fob reader LED. Red when low, Green when high.
-
-// Auxiliary - uses *** BCM mode ***
-const p_relay_1 = 8; // To gate lock (short release)
-const p_relay_2 = 9; // To strike lock (long release) (for future)
-const p_input_doorbell = 4;
-const p_input_rex = 27; // Request To Exit
-const p_buzz_outside = 18; // Small beeper behind keypad.
-
-// Led status - uses *** BCM mode ***
-const p_led_error = 5;
-const p_led_run = 7;
 
 /**
  * Locally used GPIO
@@ -86,11 +88,11 @@ const p_led_run = 7;
  */
 const gpio_relay_1 = new Gpio(p_relay_1, "out");
 const gpio_relay_2 = new Gpio(p_relay_2, "out");
-const gpio_doorbell = new Gpio(p_input_doorbell, "in", "rising", {
-  debounceTimeout: 1000,
+const gpio_doorbell = new Gpio(p_input_doorbell, "in", {
+  debounceTimeout: 10,
 });
-const gpio_rex = new Gpio(p_input_rex, "in", "rising", {
-  debounceTimeout: 1000,
+const gpio_rex = new Gpio(p_input_rex, "in", {
+  debounceTimeout: 10,
 });
 const gpio_rfid_beep = new Gpio(p_rfid_beep, "out");
 const gpio_rfid_led = new Gpio(p_rfid_led, "out");
@@ -256,7 +258,7 @@ const ringDoorbell = () => {
  */
 const requestToExit = () => {
   logger.info({ action: "REX", message: "A request to exit was made" });
-  lock.trigger();
+  grantEntry();
 };
 
 /**

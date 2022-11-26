@@ -3,7 +3,8 @@ module.exports = {
     {
       name: "access",
       script: "./access.js",
-      error_file: "logs/error/access.log"
+      error_file: "logs/error/access.log",
+      instance_var: 'INSTANCE_ID',
     },
     {
       name: "updatememberlist",
@@ -12,6 +13,7 @@ module.exports = {
       cron_restart: "*/15 * * * *",
       autorestart: false,
       instances: 1,
+      instance_var: 'INSTANCE_ID',
     },
   ],
 };

@@ -69,7 +69,7 @@ const p_rfid_beep = 24; // This beeper is louder but can't be used in short burs
 const p_rfid_led = 25; // Inbuilt fob reader LED. Red when low, Green when high.
 
 // Auxiliary - uses *** BCM mode ***
-const p_relay_1 = 17; // To gate lock (short release)
+const p_relay_1 = 14; // To gate lock (short release)
 const p_relay_2 = 15; // To strike lock (long release) (for future)
 const p_input_doorbell = 4;
 const p_input_rex = 27; // Request To Exit

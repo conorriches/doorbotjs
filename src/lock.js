@@ -5,6 +5,7 @@ export default class Lock {
     this.lock = gpio;
     this.failsafe = !!failsafe;
     this.duration = parseInt(duration);
+    this.triggerTimeout = 0;
   }
 
   /**
@@ -24,7 +25,8 @@ export default class Lock {
   }
 
   trigger() {
+    clearTimeout(this.triggerTimeout);
     this.unset();
-    setTimeout(() => this.set(), this.duration);
+    this.triggerTimeout = setTimeout(() => this.set(), this.duration);
   }
 }

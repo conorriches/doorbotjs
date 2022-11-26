@@ -1,7 +1,7 @@
 "use strict";
 
 export default class Lock {
-  constructor({ gpio, failsafe = false, duration = 50 }) {
+  constructor({ gpio, failsafe = false, duration = 500 }) {
     this.lock = gpio;
     this.failsafe = !!failsafe;
     this.duration = parseInt(duration);
@@ -12,7 +12,7 @@ export default class Lock {
    * Otherwise (e.g. strike), it will ensure the output is off, which it should already be
    */
   set() {
-    this.lock.writeSync(failsafe ? 1 : 0);
+    this.lock.writeSync(this.failsafe ? 1 : 0);
   }
 
   /**
@@ -20,7 +20,7 @@ export default class Lock {
    * Otherwise (e.g. strike), it will set the lock
    */
   unset() {
-    this.lock.writeSync(failsafe ? 0 : 1);
+    this.lock.writeSync(this.failsafe ? 0 : 1);
   }
 
   trigger() {

@@ -10,6 +10,7 @@
 import fs from "fs";
 import config from "config";
 import { Gpio } from "onoff";
+import { parse } from "csv-parse";
 
 import Wiegand from "./src/wiegand.js";
 import Keypad from "./src/keypad.js";
@@ -115,13 +116,13 @@ const strike = new Lock({
 const keypad = new Keypad({
   rowPins: [p_keypad_r1, p_keypad_r2, p_keypad_r3, p_keypad_r4],
   colPins: [p_keypad_c1, p_keypad_c2, p_keypad_c3],
-  validateCallback: (code) => validate(code),
+  validateCallback: (code) => validate({ entryCode: code, isKeycode: true }),
   beepCallback: () => buzzer_outside.beep(), // TODO: not fucking this
 });
 const fobReader = new Wiegand({
   d0: p_rfid_d0,
   d1: p_rfid_d1,
-  validateCallback: (code) => validate(code),
+  validateCallback: (code) => validate({ entryCode: code, isKeycode: false }),
 });
 
 /**
@@ -139,51 +140,123 @@ gpio_rex.watch((err) => {
   requestToExit();
 });
 
+const grantEntry = () => {
+  lock.trigger();
+  strike.trigger();
+  gpio_rfid_led.write(1);
+  setTimeout(() => gpio_rfid_led.write(0), 3000);
+};
+
+const denyEntry = () => {
+  gpio_rfid_beep.write(1);
+  setTimeout(() => gpio_rfid_beep.write(0), 3000);
+};
+
+/**
+ * Checks if a given entrycode exists in members.csv
+ * accommodates keycodes and fobcodes
+ *
+ * returns false if there's no match
+ * returns an object if there is
+ *
+ * @param {string} entryCode The entrycode to validate
+ * @param {boolean} isKeycode Whether it's a keycode
+ */
+const entryCodeExistsInMemberlist = ({ entryCode, isKeycode = false }) => {
+  fs.readFile("members.csv", "utf8", (err, data) => {
+    if (err) {
+      logger.info({
+        action: "CHECKMEMBERS",
+        message: "Couldn't read members file",
+      });
+      return false;
+    }
+
+    parse(data, function (err, records) {
+      if (err) {
+        logger.info({
+          action: "CHECKMEMBERS",
+          message: "Couldn't parse members file",
+        });
+        return false;
+      }
+
+      records.forEach((record) => {
+        // Note! memberId could be null as this may not be implemented immediately!
+        const [memberCodeId, announceName, memberId] = record;
+
+        if (isKeycode && memberCodeId.startsWith("ff")) {
+          if (memberCodeId.slice(2) === entryCode) {
+            return {
+              memberCodeId,
+              announceName,
+              memberId,
+            };
+          }
+        }
+
+        if (!isKeycode && !memberCodeId.startsWith("ff")) {
+          if (memberCodeId.slice(0, 8) == entryCode.slice(0, 8)) {
+            return {
+              memberCodeId,
+              announceName,
+              memberId,
+            };
+          }
+        }
+      });
+
+      // No records were found
+      return false;
+    });
+  });
+};
+
 /**
  * Validates a given entrycode against members.csv
- *
- * An entrycode can be:
- * - a fob ID
- * - a keycode
- *
- * These are essentially the same, except a keycode starts with ff
- *
+ * Grants or denies entry accordingly
  * @param {string} entryCode the code to validate
  */
-const validate = (entryCode) => {
+const validate = ({ entryCode, isKeycode }) => {
+  const entryDevice = isKeycode ? "keypad" : "fob reader";
+
   logger.info({
     action: "VALIDATE",
-    message: "Validating entry",
+    message: `Validating an entrycode from ${entryDevice}`,
     input: entryCode,
   });
 
-  let valid = false;
-  // TODO - Validate an entryCode
+  let memberRecord = entryCodeExistsInMemberlist({
+    entryCode: entryCode,
+    isKeycode: isKeycode,
+  });
 
-  if (valid) {
+  if (memberRecord) {
     logger.info({
       action: "ENTRY",
-      message: "Valid entry code, unlocking door",
-      input: 11111111111, // TODO get user ID
+      message: `Valid entry code from ${entryDevice}, unlocking door`,
+      input: memberRecord.memberId || memberRecord.memberCodeId,
     });
-
-    lock.trigger();
-    strike.trigger();
-    gpio_rfid_led.write(1);
-    setTimeout(() => gpio_rfid_led.write(0), 3000);
+    grantEntry();
   } else {
-    gpio_rfid_beep.write(1);
-    setTimeout(() => gpio_rfid_beep.write(0), 3000);
+    denyEntry();
   }
 };
 
+/**
+ * TODO - add a speaker and get this to play a ding dong sound
+ * Maybe add an easter egg - 1/10 chance it also plays a chicken squark :D 
+ */
 const ringDoorbell = () => {
   //TODO
   logger.info({ action: "DOORBELL", message: "The doorbell was rung" });
 };
 
+/**
+ * When someone presses the REX button inside, release the door.
+ * The door can (indeed MUST) still be opened mechanically if this fails
+ */
 const requestToExit = () => {
-  //TODO
   logger.info({ action: "REX", message: "A request to exit was made" });
   lock.trigger();
 };
@@ -196,11 +269,13 @@ const requestToExit = () => {
 setInterval(() => {
   const d = new Date();
   const seconds = d.getSeconds();
+  const millis = d.getMilliseconds();
+  const flash = millis < 100 || millis > 200 && millis < 300 || millis > 400 && millis < 500;
 
   gpio_led_run.write(seconds % 2);
 
   fs.access("logs/error/access.log", fs.F_OK, (errReadingErrLog) => {
-    gpio_led_error.write(errReadingErrLog ? 0 : 1);
+    gpio_led_error.write(errReadingErrLog ? 0 : flash);
     if (!errReadingErrLog && seconds % 30 == 0) {
       buzzer_inside.beep();
     }

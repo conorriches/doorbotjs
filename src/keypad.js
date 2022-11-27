@@ -32,7 +32,7 @@ export default class Keypad {
       this.keyPressed(key);
     });
 
-    setInterval(this.checkTimeout, 500);
+    setInterval(this.checkTimeout, 1000);
   }
 
   keyPressed(key) {
@@ -41,6 +41,8 @@ export default class Keypad {
     if (key === "#") {
       // Enter
       this.validateCallback(this.code);
+    } else if(key == "*"){
+      this.clear();
     } else {
       this.code.push(key);
     }

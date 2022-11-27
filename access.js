@@ -51,7 +51,6 @@ const p_buzz_outside = 18; // Small beeper behind keypad.
 const p_led_error = 5;
 const p_led_run = 7;
 
-
 /**
  * Set up audit log
  * This logs to level INFO only - e.g. entry logs are recorded to a rotating log
@@ -79,7 +78,6 @@ const telegram = new Telegram({
   chatId: config.get("telegram.chatid"),
 });
 telegram.announceStartup();
-
 
 /**
  * Locally used GPIO
@@ -245,7 +243,7 @@ const validate = ({ entryCode, isKeycode }) => {
 
 /**
  * TODO - add a speaker and get this to play a ding dong sound
- * Maybe add an easter egg - 1/10 chance it also plays a chicken squark :D 
+ * Maybe add an easter egg - 1/10 chance it also plays a chicken squark :D
  */
 const ringDoorbell = () => {
   //TODO
@@ -270,17 +268,20 @@ setInterval(() => {
   const d = new Date();
   const seconds = d.getSeconds();
   const millis = d.getMilliseconds();
-  const flash = millis < 100 || millis > 200 && millis < 300 || millis > 400 && millis < 500;
+  const flash =
+    seconds % 2 &&
+    (millis < 200 ||
+      (millis > 400 && millis < 600) ||
+      (millis > 800 && millis < 1000));
 
   gpio_led_run.write(seconds % 2);
 
   fs.access("logs/error/access.log", fs.F_OK, (errReadingErrLog) => {
-    gpio_led_error.write(errReadingErrLog ? 0 : flash);
+    gpio_led_error.write(errReadingErrLog ? 0 : +flash);
   });
-}, 1000);
+}, 50);
 
-
-process.on('SIGINT', _ => {
+process.on("SIGINT", (_) => {
   gpio_doorbell.unexport();
   gpio_led_error.unexport();
   gpio_led_run.unexport();

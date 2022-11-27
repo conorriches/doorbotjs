@@ -291,7 +291,7 @@ setInterval(() => {
   fs.access("logs/error/access.log", fs.F_OK, (errReadingErrLog) => {
     errorLogPresent = !errReadingErrLog;
   });
-}, 3000);
+}, 1000 * 60 * 5);
 
 process.on("SIGINT", (_) => {
   gpio_doorbell.unexport();

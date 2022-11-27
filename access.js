@@ -20,6 +20,11 @@ import Telegram from "./src/telegram.js";
 import Logger from "./src/logger.js";
 
 /**
+ * System variables
+ */
+const errorLogPresent = false;
+
+/**
  * Pin Numbers!
  * Specify here where each thing is connected to.
  * IMPORTANT - NOTE whether it's a board pin number, or BCM pin number. lol.
@@ -137,6 +142,7 @@ gpio_rex.watch((err) => {
 
   requestToExit();
 });
+
 
 const grantEntry = () => {
   lock.trigger();
@@ -275,11 +281,17 @@ setInterval(() => {
       (millis > 800 && millis < 1000));
 
   gpio_led_run.write(seconds % 2);
-
-  fs.access("logs/error/access.log", fs.F_OK, (errReadingErrLog) => {
-    gpio_led_error.write(errReadingErrLog ? 0 : +flash);
-  });
+  gpio_led_error.write(errorLogPresent ? +flash : 0);
 }, 50);
+
+/**
+ * Every few minutes, check to see if there's an error log
+ */
+setInterval(() => {
+  fs.access("logs/error/access.log", fs.F_OK, (errReadingErrLog) => {
+    errorLogPresent = !errReadingErrLog;
+  });
+}, 3000);
 
 process.on("SIGINT", (_) => {
   gpio_doorbell.unexport();

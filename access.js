@@ -22,7 +22,7 @@ import Logger from "./src/logger.js";
 /**
  * System variables
  */
-const errorLogPresent = false;
+let errorLogPresent = false;
 
 /**
  * Pin Numbers!

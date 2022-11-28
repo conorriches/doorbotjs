@@ -1,4 +1,4 @@
-import https from "https"; // or 'https' for https:// URLs
+import https from "https";
 import fs from "fs";
 import config from "config";
 import Logger from "./src/logger.js";

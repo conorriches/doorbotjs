@@ -11,6 +11,7 @@ import fs from "fs";
 import config from "config";
 import { Gpio } from "onoff";
 import { parse } from "csv-parse";
+import https from "https";
 
 import Wiegand from "./src/wiegand.js";
 import Keypad from "./src/keypad.js";
@@ -143,7 +144,6 @@ gpio_rex.watch((err) => {
   requestToExit();
 });
 
-
 const grantEntry = () => {
   lock.trigger();
   strike.trigger();
@@ -222,6 +222,11 @@ const entryCodeExistsInMemberlist = ({ entryCode, isKeycode = false }) => {
  * @param {string} entryCode the code to validate
  */
 const validate = ({ entryCode, isKeycode }) => {
+  if (entryCode.length < 8) {
+    denyEntry();
+    return;
+  }
+
   const entryDevice = isKeycode ? "keypad" : "fob reader";
 
   logger.info({
@@ -242,9 +247,34 @@ const validate = ({ entryCode, isKeycode }) => {
       input: memberRecord.memberId || memberRecord.memberCodeId,
     });
     grantEntry();
+    announceEntry(memberRecord.announceName);
   } else {
     denyEntry();
   }
+};
+
+/**
+ * Announce a user entering unless anon or empty
+ * @param {string} announceName the name
+ */
+const announceEntry = (announceName) => {
+  const anonymous = ["anon", "Anon", "anonymous", "Anonymous"];
+  if (!!announceName && anonymous.indexOf(announceName) == -1) {
+    telegram.announceEntry(announceName);
+  }
+
+  const req = https.request({
+    hostname: "members.hacman.org.uk",
+    port: 443,
+    path: "/acs/node/heartbeat",
+    method: "POST",
+    headers: {
+      ApiKey: config.get("members.apikey"),
+      Errors: errorLogPresent,
+    },
+  });
+  req.setTimeout(3000);
+
 };
 
 /**
@@ -291,6 +321,24 @@ setInterval(() => {
   fs.access("logs/error/access.log", fs.F_OK, (errReadingErrLog) => {
     errorLogPresent = !errReadingErrLog;
   });
+}, 1000 * 60 * 5);
+
+/**
+ * Sent heartbeat to the membership system every few minutes
+ * This helps debug if the doorbot goes offline
+ */
+setInterval(() => {
+  https.request({
+    hostname: "members.hacman.org.uk",
+    port: 443,
+    path: "/acs/node/heartbeat",
+    method: "POST",
+    headers: {
+      ApiKey: config.get("members.apikey"),
+      Errors: errorLogPresent,
+    },
+  });
+  req.setTimeout(3000);
 }, 1000 * 60 * 5);
 
 process.on("SIGINT", (_) => {

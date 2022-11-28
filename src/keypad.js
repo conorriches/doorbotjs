@@ -37,11 +37,11 @@ export default class Keypad {
 
   keyPressed(key) {
     this.beep();
-
-    if (key === "#") {
-      // Enter
+    
+    if (key === "#") { // Enter
       this.validateCallback(this.code);
-    } else if(key == "*"){
+    } else if(key == "*"){ // Clear
+      this.beep();
       this.clear();
     } else {
       this.code.push(key);

@@ -90,8 +90,8 @@ telegram.announceStartup();
  * For GPIO used in this file, set up onoff
  * Other pins above may be used by libraries only
  */
-const gpio_relay_1 = new Gpio(p_relay_1, "out", 'none', {activeLow: true});
-const gpio_relay_2 = new Gpio(p_relay_2, "out", 'none', {activeLow: true});
+const gpio_relay_1 = new Gpio(p_relay_1, "out", "none", { activeLow: true });
+const gpio_relay_2 = new Gpio(p_relay_2, "out", "none", { activeLow: true });
 const gpio_doorbell = new Gpio(p_input_doorbell, "in", "rising", {
   debounceTimeout: 10,
 });
@@ -274,7 +274,6 @@ const announceEntry = (announceName) => {
     },
   });
   req.setTimeout(3000);
-
 };
 
 /**
@@ -293,6 +292,32 @@ const ringDoorbell = () => {
 const requestToExit = () => {
   logger.info({ action: "REX", message: "A request to exit was made" });
   grantEntry();
+};
+
+/**
+ * Imports the value of errorLogPresent
+ */
+const checkForErrors = () => {
+  fs.access("logs/error/access.log", fs.F_OK, (errReadingErrLog) => {
+    errorLogPresent = !errReadingErrLog;
+  });
+};
+
+/**
+ * Lets the membership system know we're alive
+ */
+const sendHeartbeat = () => {
+  https.request({
+    hostname: "members.hacman.org.uk",
+    port: 443,
+    path: "/acs/node/heartbeat",
+    method: "POST",
+    headers: {
+      ApiKey: config.get("members.apikey"),
+      Errors: errorLogPresent,
+    },
+  });
+  req.setTimeout(3000);
 };
 
 /**
@@ -318,9 +343,7 @@ setInterval(() => {
  * Every few minutes, check to see if there's an error log
  */
 setInterval(() => {
-  fs.access("logs/error/access.log", fs.F_OK, (errReadingErrLog) => {
-    errorLogPresent = !errReadingErrLog;
-  });
+  checkForErrors();
 }, 1000 * 60 * 5);
 
 /**
@@ -328,18 +351,15 @@ setInterval(() => {
  * This helps debug if the doorbot goes offline
  */
 setInterval(() => {
-  https.request({
-    hostname: "members.hacman.org.uk",
-    port: 443,
-    path: "/acs/node/heartbeat",
-    method: "POST",
-    headers: {
-      ApiKey: config.get("members.apikey"),
-      Errors: errorLogPresent,
-    },
-  });
-  req.setTimeout(3000);
+  sendHeartbeat();
 }, 1000 * 60 * 5);
+
+
+/**
+ * Startup activities
+ */
+checkForErrors();
+sendHeartbeat();
 
 process.on("SIGINT", (_) => {
   gpio_doorbell.unexport();

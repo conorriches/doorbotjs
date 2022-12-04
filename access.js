@@ -12,6 +12,7 @@ import config from "config";
 import { Gpio } from "onoff";
 import { parse } from "csv-parse";
 import axios from "axios";
+import LCD from "raspberrypi-liquid-crystal";
 
 import Wiegand from "./src/wiegand.js";
 import Keypad from "./src/keypad.js";
@@ -19,7 +20,6 @@ import Buzzer from "./src/buzzer.js";
 import Lock from "./src/lock.js";
 import Telegram from "./src/telegram.js";
 import Logger from "./src/logger.js";
-
 /**
  * System variables
  */
@@ -139,6 +139,14 @@ const fobReader = new Wiegand({
   pinD1: p_rfid_d1,
   validateCallback: (code) => validate({ entryCode: code, isKeycode: false }),
 });
+
+/**
+ * Scart the LCD display
+ */
+const lcd = new LCD( 1, 0x27, 16, 2 );
+lcd.beginSync();
+lcd.clearSync();
+lcd.noDisplay();
 
 /**
  * Watch inputs
@@ -267,13 +275,13 @@ const validate = ({ entryCode, isKeycode }) => {
       telegram.announceEntry(memberRecord.announceName);
     }
 
-    try {
-      membershipSystem.post("acs/activity", {
+    membershipSystem
+      .post("acs/activity", {
         tagId: memberRecord.memberCodeId,
         device: entryDevice,
         occurredAt: "0",
-      });
-    } catch {}
+      })
+      .catch((error) => {});
   } else {
     denyEntry();
   }
@@ -301,18 +309,15 @@ const requestToExit = () => {
  * Imports the value of errorLogPresent
  */
 const checkForErrors = () => {
-  fs.access("logs/error/access.log", fs.F_OK, (errReadingErrLog) => {
-    errorLogPresent = !errReadingErrLog;
-  });
+  const { size } = fs.statSync("logs/error/access.log");
+  errorLogPresent = !!size;
 };
 
 /**
  * Lets the membership system know we're alive
  */
 const sendHeartbeat = () => {
-  try {
-    membershipSystem.post("acs/node/heartbeat");
-  } catch {}
+  membershipSystem.post("acs/node/heartbeat").catch((error) => {});
 };
 
 /**

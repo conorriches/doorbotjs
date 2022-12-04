@@ -17,6 +17,7 @@
     "node-telegram-bot-api": "^0.60.0",
     "onoff": "^6.0.3",
     "pm2": "^5.2.2",
+    "raspberrypi-liquid-crystal": "^1.18.0",
     "rpi-keypad": "^1.0.3",
     "wiegand-node": "^1.1.9",
     "winston": "^3.8.2",

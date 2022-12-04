@@ -24,13 +24,6 @@ import Logger from "./src/logger.js";
  * System variables
  */
 let errorLogPresent = false;
-const membershipSystem = axios.create({
-  baseURL: "https://members.hacman.org.uk",
-  timeout: 3000,
-  headers: {
-    ApiKey: config.get("members.apikey"),
-  },
-});
 
 /**
  * Pin Numbers!
@@ -91,6 +84,17 @@ const telegram = new Telegram({
   chatId: config.get("telegram.chatid"),
 });
 telegram.announceStartup();
+
+/**
+ * Set up API for membership system
+ */
+const membershipSystem = axios.create({
+  baseURL: "https://members.hacman.org.uk",
+  timeout: 5000,
+  headers: {
+    ApiKey: config.get("members.apikey"),
+  },
+});
 
 /**
  * Locally used GPIO
@@ -263,11 +267,13 @@ const validate = ({ entryCode, isKeycode }) => {
       telegram.announceEntry(memberRecord.announceName);
     }
 
-    membershipSystem.post("acs/activity", {
-      tagId: memberRecord.memberCodeId,
-      device: entryDevice,
-      occurredAt: "0",
-    });
+    try {
+      membershipSystem.post("acs/activity", {
+        tagId: memberRecord.memberCodeId,
+        device: entryDevice,
+        occurredAt: "0",
+      });
+    } catch {}
   } else {
     denyEntry();
   }
@@ -304,7 +310,9 @@ const checkForErrors = () => {
  * Lets the membership system know we're alive
  */
 const sendHeartbeat = () => {
-  membershipSystem.post("acs/node/heartbeat");
+  try {
+    membershipSystem.post("acs/node/heartbeat");
+  } catch {}
 };
 
 /**

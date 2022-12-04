@@ -90,8 +90,8 @@ telegram.announceStartup();
  * For GPIO used in this file, set up onoff
  * Other pins above may be used by libraries only
  */
-const gpio_relay_1 = new Gpio(p_relay_1, "out");
-const gpio_relay_2 = new Gpio(p_relay_2, "out");
+const gpio_relay_1 = new Gpio(p_relay_1, "out", 'none', {activeLow: true});
+const gpio_relay_2 = new Gpio(p_relay_2, "out", 'none', {activeLow: true});
 const gpio_doorbell = new Gpio(p_input_doorbell, "in", "rising", {
   debounceTimeout: 10,
 });

@@ -307,7 +307,7 @@ const checkForErrors = () => {
  * Lets the membership system know we're alive
  */
 const sendHeartbeat = () => {
-  https.request({
+  const req = https.request({
     hostname: "members.hacman.org.uk",
     port: 443,
     path: "/acs/node/heartbeat",

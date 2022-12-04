@@ -12,7 +12,6 @@ import config from "config";
 import { Gpio } from "onoff";
 import { parse } from "csv-parse";
 import axios from "axios";
-import LCD from "raspberrypi-liquid-crystal";
 
 import Wiegand from "./src/wiegand.js";
 import Keypad from "./src/keypad.js";
@@ -20,6 +19,7 @@ import Buzzer from "./src/buzzer.js";
 import Lock from "./src/lock.js";
 import Telegram from "./src/telegram.js";
 import Logger from "./src/logger.js";
+import Lcd from "./src/lcd.js";
 /**
  * System variables
  */
@@ -139,15 +139,9 @@ const fobReader = new Wiegand({
   pinD1: p_rfid_d1,
   validateCallback: (code) => validate({ entryCode: code, isKeycode: false }),
 });
+const lcdDisplay = new Lcd();
+lcdDisplay.showMessage({line1: "HELLO WORLD", line2: "I'm alive!"})
 
-/**
- * Scart the LCD display
- */
-const lcd = new LCD(1, 0x27, 16, 2);
-lcd.beginSync();
-lcd.clearSync();
-lcd.noDisplay();
-lcd.createCharSync(0, [0x1f, 0x11, 0x17, 0x11, 0x17, 0x11, 0x1f, 0x00]);
 
 /**
  * Watch inputs
@@ -304,15 +298,7 @@ const ringDoorbell = () => {
 const requestToExit = () => {
   logger.info({ action: "REX", message: "A request to exit was made" });
   grantEntry();
-  lcd.clearSync();
-  lcd.homeSync();
-  lcd.printLineSync(0, "Goodbye!");
-  lcd.printLineSync(1, "See you soon");
-  lcd.displaySync();
-  setTimeout(() => {
-    lcd.clearSync();
-    lcd.noDisplay();
-  }, 5000);
+  lcdDisplay.showMessage({line1: "Goodbye!", line2: "See you soon"})
 };
 
 /**
@@ -322,17 +308,7 @@ const checkForErrors = () => {
   const { size } = fs.statSync("logs/error/access.log");
   errorLogPresent = !!size;
 
-  if (errorLogPresent) {
-    lcd.clearSync();
-    lcd.homeSync();
-    lcd.print(LCD.getChar(0));
-    lcd.print("maintenance")
-    lcd.printLineSync(1, "errors logged");
-    lcd.displaySync();
-  } else {
-    lcd.clearSync();
-    lcd.noDisplaySync();
-  }
+  lcdDisplay.setErrorCode(size);
 };
 
 /**

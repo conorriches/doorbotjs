@@ -140,8 +140,7 @@ const fobReader = new Wiegand({
   validateCallback: (code) => validate({ entryCode: code, isKeycode: false }),
 });
 const lcdDisplay = new Lcd();
-lcdDisplay.showMessage({line1: "HELLO WORLD", line2: "I'm alive!"})
-
+lcdDisplay.showMessage({ line1: "HELLO WORLD", line2: "I'm alive!" });
 
 /**
  * Watch inputs
@@ -262,6 +261,8 @@ const validate = ({ entryCode, isKeycode }) => {
     });
     grantEntry();
 
+    lcdDisplay.welcomeMember(memberRecord.announceName);
+
     const anonymous = ["anon", "Anon", "anonymous", "Anonymous"];
     if (
       !!memberRecord.announceName &&
@@ -298,7 +299,7 @@ const ringDoorbell = () => {
 const requestToExit = () => {
   logger.info({ action: "REX", message: "A request to exit was made" });
   grantEntry();
-  lcdDisplay.showMessage({line1: "Goodbye!", line2: "See you soon"})
+  lcdDisplay.showMessage({ line1: "Goodbye!", line2: "See you soon" });
 };
 
 /**
@@ -329,9 +330,7 @@ setInterval(() => {
   const millis = d.getMilliseconds();
   const flash =
     seconds % 2 &&
-    (millis < 150 ||
-      (millis > 300 && millis < 450) ||
-      (millis > 600 && millis < 750));
+    ((millis < 50) || (millis > 500 && millis < 550));
 
   gpio_led_run.write(seconds % 2);
   gpio_led_error.write(errorLogPresent ? +flash : 0);

@@ -14,10 +14,6 @@ export default class Lcd {
     this.lcd.beginSync();
     this.lcd.clearSync();
     this.lcd.noDisplay();
-    this.lcd.createCharSync(
-      0,
-      [0x1f, 0x11, 0x17, 0x11, 0x17, 0x11, 0x1f, 0x00]
-    );
   }
 
   setErrorCode(errorCode = 0) {
@@ -37,12 +33,19 @@ export default class Lcd {
       this.timeout = 0;
       this.showDefaultScreen();
     }, duration);
-
   }
 
+  welcomeMember(announceName) {
+    const greetings = ["Howdy", "Hello", "Heya", "Hi", "Greeting", "Welcome"];
+    this.showMessage({
+      line1: greetings[Math.floor(Math.random() * (greetings.length + 1))] + ",",
+      line2: announceName,
+    });
+  }
+  
   showDefaultScreen() {
     // Don't interrupt a message being shown
-    if(this.timeout) return;
+    if (this.timeout) return;
 
     this.lcd.clearSync();
     if (this.errorCode) {

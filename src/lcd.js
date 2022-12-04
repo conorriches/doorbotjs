@@ -47,11 +47,11 @@ export default class Lcd {
     this.lcd.clearSync();
     if (this.errorCode) {
       switch (this.errorCode) {
-        case ERR_NO_FOB_READER:
+        case this.ERR_NO_FOB_READER:
           this.lcd.printLineSync(0, "No Fob reader!");
           this.lcd.printLineSync(1, "Check wiring");
           break;
-        case ERR_OLD_MEMBER_LIST:
+        case this.ERR_OLD_MEMBER_LIST:
           this.lcd.printLineSync(0, "Old member list");
           this.lcd.printLineSync(1, "Check internet");
           break;

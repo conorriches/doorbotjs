@@ -25,7 +25,7 @@ import Logger from "./src/logger.js";
  */
 let errorLogPresent = false;
 const membershipSystem = axios.create({
-  baseURL: "https://members.hacman.org.uk",
+  baseURL: "members.hacman.org.uk",
   timeout: 3000,
   headers: {
     ApiKey: config.get("members.apikey"),
@@ -318,9 +318,9 @@ setInterval(() => {
   const millis = d.getMilliseconds();
   const flash =
     seconds % 2 &&
-    (millis < 200 ||
-      (millis > 400 && millis < 600) ||
-      (millis > 800 && millis < 1000));
+    (millis < 150 ||
+      (millis > 300 && millis < 450) ||
+      (millis > 600 && millis < 750));
 
   gpio_led_run.write(seconds % 2);
   gpio_led_error.write(errorLogPresent ? +flash : 0);
@@ -346,4 +346,3 @@ setInterval(() => {
  */
 checkForErrors();
 sendHeartbeat();
-

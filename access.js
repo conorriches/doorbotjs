@@ -143,7 +143,7 @@ const fobReader = new Wiegand({
 /**
  * Scart the LCD display
  */
-const lcd = new LCD( 1, 0x27, 16, 2 );
+const lcd = new LCD(1, 0x27, 16, 2);
 lcd.beginSync();
 lcd.clearSync();
 lcd.noDisplay();
@@ -305,13 +305,13 @@ const requestToExit = () => {
   grantEntry();
   lcd.clearSync();
   lcd.homeSync();
-  lcd.printLineSync("Goodbye!");
-  lcd.printLineSync("See you soon");
+  lcd.printLineSync(0, "Goodbye!");
+  lcd.printLineSync(1, "See you soon");
   lcd.displaySync();
   setTimeout(() => {
     lcd.clearSync();
     lcd.noDisplay();
-  }, 5000)
+  }, 5000);
 };
 
 /**
@@ -321,12 +321,13 @@ const checkForErrors = () => {
   const { size } = fs.statSync("logs/error/access.log");
   errorLogPresent = !!size;
 
-  if(errorLogPresent){
+  if (errorLogPresent) {
     lcd.clearSync();
     lcd.homeSync();
-    lcd.printLineSync("Errors logged");
+    lcd.printLineSync(0, "Maintenance Alert");
+    lcd.printLineSync(1, "errors logged");
     lcd.displaySync();
-  }else{
+  } else {
     lcd.clearSync();
     lcd.noDisplaySync();
   }

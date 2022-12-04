@@ -304,7 +304,7 @@ const checkForErrors = () => {
  * Lets the membership system know we're alive
  */
 const sendHeartbeat = () => {
-  membershipSystem.post("https://members.hacman.org.uk/acs/node/heartbeat");
+  membershipSystem.post("/acs/node/heartbeat");
 };
 
 /**

@@ -25,7 +25,7 @@ import Logger from "./src/logger.js";
  */
 let errorLogPresent = false;
 const membershipSystem = axios.create({
-  baseURL: "members.hacman.org.uk",
+  baseURL: "https://members.hacman.org.uk",
   timeout: 3000,
   headers: {
     ApiKey: config.get("members.apikey"),
@@ -97,8 +97,8 @@ telegram.announceStartup();
  * For GPIO used in this file, set up onoff
  * Other pins above may be used by libraries only
  */
-const gpio_relay_1 = new Gpio(p_relay_1, "out", "none", { activeLow: true });
-const gpio_relay_2 = new Gpio(p_relay_2, "out", "none", { activeLow: true });
+const gpio_relay_1 = new Gpio(p_relay_1, "high", "none", { activeLow: true });
+const gpio_relay_2 = new Gpio(p_relay_2, "high", "none", { activeLow: true });
 const gpio_doorbell = new Gpio(p_input_doorbell, "in", "rising", {
   debounceTimeout: 10,
 });

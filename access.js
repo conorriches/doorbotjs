@@ -147,6 +147,7 @@ const lcd = new LCD(1, 0x27, 16, 2);
 lcd.beginSync();
 lcd.clearSync();
 lcd.noDisplay();
+lcd.createCharSync(0, [0x1f, 0x11, 0x17, 0x11, 0x17, 0x11, 0x1f, 0x00]);
 
 /**
  * Watch inputs
@@ -324,7 +325,8 @@ const checkForErrors = () => {
   if (errorLogPresent) {
     lcd.clearSync();
     lcd.homeSync();
-    lcd.printLineSync(0, "Maintenance Alert");
+    lcd.print(LCD.getChar(0));
+    lcd.print("maintenance")
     lcd.printLineSync(1, "errors logged");
     lcd.displaySync();
   } else {

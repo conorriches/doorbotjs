@@ -28,10 +28,10 @@ export default class Lcd {
   showMessage({ line1 = "", line2 = "", duration = 8000 }) {
     clearTimeout(this.timeout);
 
-    lcd.clearSync();
-    lcd.printLineSync(0, line1);
-    lcd.printLineSync(1, line2);
-    lcd.displaySync();
+    this.lcd.clearSync();
+    this.lcd.printLineSync(0, line1);
+    this.lcd.printLineSync(1, line2);
+    this.lcd.displaySync();
 
     this.timeout = setTimeout(() => {
       this.timeout = 0;
@@ -48,20 +48,20 @@ export default class Lcd {
     if (this.errorCode) {
       switch (this.errorCode) {
         case ERR_NO_FOB_READER:
-          lcd.printLineSync(0, "No Fob reader!");
-          lcd.printLineSync(1, "Check wiring");
+          this.lcd.printLineSync(0, "No Fob reader!");
+          this.lcd.printLineSync(1, "Check wiring");
           break;
         case ERR_OLD_MEMBER_LIST:
-          lcd.printLineSync(0, "Old member list");
-          lcd.printLineSync(1, "Check internet");
+          this.lcd.printLineSync(0, "Old member list");
+          this.lcd.printLineSync(1, "Check internet");
           break;
         default:
-          lcd.printLineSync(0, "Check error logs");
-          lcd.printLineSync(1, "Error:" + this.errorCode);
+          this.lcd.printLineSync(0, "Check error logs");
+          this.lcd.printLineSync(1, "Error:" + this.errorCode);
       }
-      lcd.display();
+      this.lcd.display();
     } else {
-      lcd.noDisplay();
+      this.lcd.noDisplay();
     }
   }
 }

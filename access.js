@@ -99,10 +99,10 @@ telegram.announceStartup();
  */
 const gpio_relay_1 = new Gpio(p_relay_1, "high", "none", { activeLow: true });
 const gpio_relay_2 = new Gpio(p_relay_2, "high", "none", { activeLow: true });
-const gpio_doorbell = new Gpio(p_input_doorbell, "in", "rising", {
+const gpio_doorbell = new Gpio(p_input_doorbell, "in", "falling", {
   debounceTimeout: 10,
 });
-const gpio_rex = new Gpio(p_input_rex, "in", "rising", {
+const gpio_rex = new Gpio(p_input_rex, "in", "falling", {
   debounceTimeout: 10,
 });
 const gpio_rfid_beep = new Gpio(p_rfid_beep, "out");

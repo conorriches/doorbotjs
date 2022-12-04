@@ -263,7 +263,7 @@ const validate = ({ entryCode, isKeycode }) => {
       telegram.announceEntry(memberRecord.announceName);
     }
 
-    membershipSystem.post("/acs/activity", {
+    membershipSystem.post("acs/activity", {
       tagId: memberRecord.memberCodeId,
       device: entryDevice,
       occurredAt: "0",
@@ -304,7 +304,7 @@ const checkForErrors = () => {
  * Lets the membership system know we're alive
  */
 const sendHeartbeat = () => {
-  membershipSystem.post("/acs/node/heartbeat");
+  membershipSystem.post("acs/node/heartbeat");
 };
 
 /**
@@ -347,13 +347,3 @@ setInterval(() => {
 checkForErrors();
 sendHeartbeat();
 
-process.on("SIGINT", (_) => {
-  gpio_doorbell.unexport();
-  gpio_led_error.unexport();
-  gpio_led_run.unexport();
-  gpio_relay_1.unexport();
-  gpio_relay_2.unexport();
-  gpio_rex.unexport();
-  gpio_rfid_beep.unexport();
-  gpio_rfid_led.unexport();
-});

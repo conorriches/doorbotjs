@@ -11,7 +11,7 @@ import fs from "fs";
 import config from "config";
 import { Gpio } from "onoff";
 import { parse } from "csv-parse";
-import https from "https";
+import axios from "axios";
 
 import Wiegand from "./src/wiegand.js";
 import Keypad from "./src/keypad.js";
@@ -24,6 +24,13 @@ import Logger from "./src/logger.js";
  * System variables
  */
 let errorLogPresent = false;
+const membershipSystem = axios.create({
+  baseURL: "https://members.hacman.org.uk",
+  timeout: 3000,
+  headers: {
+    ApiKey: config.get("members.apikey"),
+  },
+});
 
 /**
  * Pin Numbers!
@@ -247,33 +254,23 @@ const validate = ({ entryCode, isKeycode }) => {
       input: memberRecord.memberId || memberRecord.memberCodeId,
     });
     grantEntry();
-    announceEntry(memberRecord.announceName);
+
+    const anonymous = ["anon", "Anon", "anonymous", "Anonymous"];
+    if (
+      !!memberRecord.announceName &&
+      anonymous.indexOf(memberRecord.announceName) == -1
+    ) {
+      telegram.announceEntry(memberRecord.announceName);
+    }
+
+    membershipSystem.post("/acs/activity", {
+      tagId: memberRecord.memberCodeId,
+      device: entryDevice,
+      occurredAt: "0",
+    });
   } else {
     denyEntry();
   }
-};
-
-/**
- * Announce a user entering unless anon or empty
- * @param {string} announceName the name
- */
-const announceEntry = (announceName) => {
-  const anonymous = ["anon", "Anon", "anonymous", "Anonymous"];
-  if (!!announceName && anonymous.indexOf(announceName) == -1) {
-    telegram.announceEntry(announceName);
-  }
-
-  const req = https.request({
-    hostname: "members.hacman.org.uk",
-    port: 443,
-    path: "/acs/node/heartbeat",
-    method: "POST",
-    headers: {
-      ApiKey: config.get("members.apikey"),
-      Errors: errorLogPresent,
-    },
-  });
-  req.setTimeout(3000);
 };
 
 /**
@@ -307,17 +304,7 @@ const checkForErrors = () => {
  * Lets the membership system know we're alive
  */
 const sendHeartbeat = () => {
-  const req = https.request({
-    hostname: "members.hacman.org.uk",
-    port: 443,
-    path: "/acs/node/heartbeat",
-    method: "POST",
-    headers: {
-      ApiKey: config.get("members.apikey"),
-      Errors: errorLogPresent,
-    },
-  });
-  req.setTimeout(3000);
+  membershipSystem.post("https://members.hacman.org.uk/acs/node/heartbeat");
 };
 
 /**
@@ -353,7 +340,6 @@ setInterval(() => {
 setInterval(() => {
   sendHeartbeat();
 }, 1000 * 60 * 5);
-
 
 /**
  * Startup activities

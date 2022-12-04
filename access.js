@@ -303,6 +303,15 @@ const ringDoorbell = () => {
 const requestToExit = () => {
   logger.info({ action: "REX", message: "A request to exit was made" });
   grantEntry();
+  lcd.clearSync();
+  lcd.homeSync();
+  lcd.printLineSync("Goodbye!");
+  lcd.printLineSync("See you soon");
+  lcd.displaySync();
+  setTimeout(() => {
+    lcd.clearSync();
+    lcd.noDisplay();
+  }, 5000)
 };
 
 /**
@@ -311,6 +320,16 @@ const requestToExit = () => {
 const checkForErrors = () => {
   const { size } = fs.statSync("logs/error/access.log");
   errorLogPresent = !!size;
+
+  if(errorLogPresent){
+    lcd.clearSync();
+    lcd.homeSync();
+    lcd.printLineSync("Errors logged");
+    lcd.displaySync();
+  }else{
+    lcd.clearSync();
+    lcd.noDisplaySync();
+  }
 };
 
 /**

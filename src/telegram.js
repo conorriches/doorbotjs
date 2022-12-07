@@ -9,6 +9,15 @@ export default class Telegram {
     this.lastEnteredName = "";
     this.lastMessageString = "";
     this.lastMessageId = 0;
+
+    // If something goes wrong with telegram it's not a big deal
+    this.bot.on('polling_error', (error) => {
+      console.log(error.code); 
+    });
+
+    this.bot.on('webhook_error', (error) => {
+      console.log(error.code);
+    });
   }
 
   /**
@@ -37,15 +46,15 @@ export default class Telegram {
   }
 
   announceDoorbell() {
-    this.bot.sendMessage(this.chatId, "🔔 Doorbell!");
+    return this.bot.sendMessage(this.chatId, "🔔 Doorbell!");
   }
 
   announceStartup() {
-    this.bot.sendMessage(this.chatId, "🤖 The doorbot was started!");
+    return this.bot.sendMessage(this.chatId, "🤖 The doorbot was started!");
   }
 
   announceError() {
-    this.bot.sendMessage(
+    return this.bot.sendMessage(
       this.chatId,
       "🛑 An error was encountered an written to the log file. No more notifications about errors will be sent until the log file is cleared."
     );

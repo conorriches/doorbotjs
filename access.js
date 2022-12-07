@@ -24,6 +24,7 @@ import Lcd from "./src/lcd.js";
  * System variables
  */
 let errorLogPresent = false;
+let errorNotified = false;
 
 /**
  * Pin Numbers!
@@ -309,6 +310,16 @@ const checkForErrors = () => {
   const { size } = fs.statSync("logs/error/access.log");
   errorLogPresent = !!size;
 
+  if(errorLogPresent && !errorNotified){
+    telegram.announceError().then(_ => {
+      errorNotified = true;
+    }).catch((_)=>{
+      console.log("Error reporting error")
+    });
+  }
+  if(!errorLogPresent && errorNotified){
+    errorNotified = false;
+  }
   lcdDisplay.setErrorCode(size);
 };
 

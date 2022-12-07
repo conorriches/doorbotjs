@@ -1,8 +1,8 @@
-import https from "https";
 import fs from "fs";
 import config from "config";
 import Logger from "./src/logger.js";
 import { parse } from "csv-parse";
+import axios from "axios";
 
 const logger = new Logger();
 const tempFile = "temp/members.csv";
@@ -13,25 +13,17 @@ const key = config.get("members.querykey");
  * Download file to temporary file for checking
  * This prevents a 404/500 page replacing the memberlist
  */
-https.get(
-  `https://members.hacman.org.uk/query2.php?key=${key}`,
-  function (response) {
-    if (response.statusCode != 200) {
+axios
+  .get(`https://members.hacman.org.uk/query2.php?key=${key}`)
+  .then((response) => {
+    if (response.status != 200) {
       logger.info({
         action: "DOWNLOAD",
         message: "Memberlist response wasn't a 200",
       });
     }
-
-    const file = fs.createWriteStream(tempFile);
-    response.pipe(file);
-
-    file.on("finish", () => {
-      file.close();
-      verifyFile();
-    });
-  }
-);
+    response.data.pipe(fs.createWriteStream(tempFile));
+  });
 
 /**
  * Verify what we downloaded looks legit

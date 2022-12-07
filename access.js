@@ -381,6 +381,13 @@ const sendHeartbeat = () => {
 };
 
 /**
+ *  Returns the index of which error is active
+ */
+const errorStatus = () => {
+  return Object.values(errors).findIndex((v) => v.status);
+};
+
+/**
  * Update LED status on front panel
  * RUN led blinks every second, to show life
  * ERROR led illuminates on the presence of an error log
@@ -389,10 +396,21 @@ setInterval(() => {
   const d = new Date();
   const seconds = d.getSeconds();
   const millis = d.getMilliseconds();
-  const flash = seconds % 2 && (millis < 50 || (millis > 500 && millis < 550));
+  let flash = false;
 
+  // Blink Status LED 
   gpio_led_run.write(seconds % 2);
-  gpio_led_error.write(errorLogPresent ? +flash : 0);
+
+  // Blink error LED
+  const activeErrors = errorStatus();
+  if (activeErrors > -1) {
+    const blinkCount = (activeErrors + 2);
+    const interval = 200;
+    const len = interval * blinkCount
+    flash = seconds % 2 && millis < len && millis.toString().padStart(3,'0').charAt(0) % 2 === 0
+  }
+
+  gpio_led_error.write(errors["errorLog"] ? +flash : 0);
 }, 50);
 
 /**

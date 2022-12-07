@@ -314,13 +314,14 @@ const requestToExit = () => {
  * - memberList - member list file is out of date
  */
 const monitorError = ({ type, isInError, errorMessage = "" }) => {
-  errors[type]["status"] = isInError; //diffHours > 6;
+  errors[type]["status"] = isInError;
 
   if (errors[type]["status"] && !errors[type]["notified"]) {
     telegram
       .announceError({ type: type, details: errorMessage })
       .then((_) => {
         errors[type]["notified"] = true;
+        lcdDisplay.setErrorType(type);
       })
       .catch((_) => {
         console.log("Error reporting error");
@@ -350,9 +351,6 @@ const checkForErrors = () => {
         errorMessage:
           "Content has been written to the error log. Run `pm2 logs` on the doorbot for info.",
       });
-      if (!!size) {
-        lcdDisplay.setErrorCode(size);
-      }
     }
   });
 
@@ -406,11 +404,14 @@ setInterval(() => {
   if (activeErrors > -1) {
     const blinkCount = (activeErrors + 2);
     const interval = 200;
-    const len = interval * blinkCount
+    const len = interval * blinkCount;
     flash = seconds % 2 && millis < len && millis.toString().padStart(3,'0').charAt(0) % 2 === 0
   }
 
   gpio_led_error.write(errors["errorLog"] ? +flash : 0);
+
+  
+
 }, 50);
 
 /**

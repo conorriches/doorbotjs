@@ -3,12 +3,12 @@
 import LCD from "raspberrypi-liquid-crystal";
 
 export default class Lcd {
-  static ERR_NO_FOB_READER = -1;
-  static ERR_OLD_MEMBER_LIST = -2;
+  static ERR_LOG_FILE = "errorLog";
+  static ERR_OLD_MEMBER_LIST = "memberList";
 
   constructor() {
     this.lcd = new LCD(1, 0x27, 16, 2);
-    this.errorCode = 0;
+    this.errorType = "";
     this.timeout = 0;
 
     this.lcd.beginSync();
@@ -16,8 +16,8 @@ export default class Lcd {
     this.lcd.noDisplay();
   }
 
-  setErrorCode(errorCode = 0) {
-    this.errorCode = errorCode;
+  setErrorType(errorType = "") {
+    this.errorType = errorType;
     this.showDefaultScreen();
   }
 
@@ -48,19 +48,19 @@ export default class Lcd {
     if (this.timeout) return;
 
     this.lcd.clearSync();
-    if (this.errorCode) {
-      switch (this.errorCode) {
-        case this.ERR_NO_FOB_READER:
-          this.lcd.printLineSync(0, "No Fob reader!");
-          this.lcd.printLineSync(1, "Check wiring");
+    if (this.errorType) {
+      switch (this.errorType) {
+        case this.ERR_LOG_FILE:
+          this.lcd.printLineSync(0, "Errors logged");
+          this.lcd.printLineSync(1, "Exec pm2 logs");
           break;
         case this.ERR_OLD_MEMBER_LIST:
           this.lcd.printLineSync(0, "Old member list");
           this.lcd.printLineSync(1, "Check internet");
           break;
         default:
-          this.lcd.printLineSync(0, "Check error logs");
-          this.lcd.printLineSync(1, "Error:" + this.errorCode);
+          this.lcd.printLineSync(0, "Unknown Error:");
+          this.lcd.printLineSync(1, this.errorType);
       }
       this.lcd.display();
     } else {

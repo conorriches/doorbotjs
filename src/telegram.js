@@ -11,11 +11,11 @@ export default class Telegram {
     this.lastMessageId = 0;
 
     // If something goes wrong with telegram it's not a big deal
-    this.bot.on('polling_error', (error) => {
-      console.log(error.code); 
+    this.bot.on("polling_error", (error) => {
+      console.log(error.code);
     });
 
-    this.bot.on('webhook_error', (error) => {
+    this.bot.on("webhook_error", (error) => {
       console.log(error.code);
     });
   }
@@ -53,10 +53,15 @@ export default class Telegram {
     return this.bot.sendMessage(this.chatId, "🤖 The doorbot was started!");
   }
 
-  announceError() {
+  announceError({ type = "", details = "" }) {
+    const typeStr = type ? `[${type}] ` : "";
+    const detailsStr = details
+      ? `\nExtra information on the error below: \n\n${details}`
+      : "";
+
     return this.bot.sendMessage(
       this.chatId,
-      "🛑 An error was encountered an written to the log file. No more notifications about errors will be sent until the log file is cleared."
+      `🛑 ${typeStr}An error was encountered with the entry system.${detailsStr}`
     );
   }
 }

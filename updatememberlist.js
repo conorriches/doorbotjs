@@ -14,7 +14,9 @@ const key = config.get("members.querykey");
  * This prevents a 404/500 page replacing the memberlist
  */
 axios
-  .get(`https://members.hacman.org.uk/query2.php?key=${key}`)
+  .get(`https://members.hacman.org.uk/query2.php?key=${key}`, {
+    responseType: "stream",
+  })
   .then((response) => {
     if (response.status != 200) {
       logger.info({

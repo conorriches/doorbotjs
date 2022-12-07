@@ -20,11 +20,14 @@ import Lock from "./src/lock.js";
 import Telegram from "./src/telegram.js";
 import Logger from "./src/logger.js";
 import Lcd from "./src/lcd.js";
+
 /**
  * System variables
  */
-let errorLogPresent = false;
-let errorNotified = false;
+let errors = {
+  errorLog: { status: false, notified: false },
+  memberList: { status: false, notified: false },
+};
 
 /**
  * Pin Numbers!
@@ -304,23 +307,70 @@ const requestToExit = () => {
 };
 
 /**
- * Imports the value of errorLogPresent
+ * Monitors errors of differing types and announces new error types as they happen
+ *
+ * Types:
+ * - errorLog - an error log file is written
+ * - memberList - member list file is out of date
+ */
+const monitorError = ({ type, isInError, errorMessage = "" }) => {
+  errors[type]["status"] = isInError; //diffHours > 6;
+
+  if (errors[type]["status"] && !errors[type]["notified"]) {
+    telegram
+      .announceError({ type: type, details: errorMessage })
+      .then((_) => {
+        errors[type]["notified"] = true;
+      })
+      .catch((_) => {
+        console.log("Error reporting error");
+      });
+  }
+
+  // Handle resetting of status
+  if (!errors[type]["status"] && errors[type]["notified"]) {
+    errors[type]["notified"] = false;
+  }
+};
+
+/**
+ * Sets the error variables based on file system activity
+ * - Log file
+ * - Outdated member list
  */
 const checkForErrors = () => {
-  const { size } = fs.statSync("logs/error/access.log");
-  errorLogPresent = !!size;
+  // Raise error if there's a log file with content
+  fs.stat("logs/error/access.log", (err, stats) => {
+    if (!err) {
+      const { size } = stats;
 
-  if(errorLogPresent && !errorNotified){
-    telegram.announceError().then(_ => {
-      errorNotified = true;
-    }).catch((_)=>{
-      console.log("Error reporting error")
-    });
-  }
-  if(!errorLogPresent && errorNotified){
-    errorNotified = false;
-  }
-  lcdDisplay.setErrorCode(size);
+      monitorError({
+        type: "errorLog",
+        isInError: !!size,
+        errorMessage:
+          "Content has been written to the error log. Run `pm2 logs` on the doorbot for info.",
+      });
+      if (!!size) {
+        lcdDisplay.setErrorCode(size);
+      }
+    }
+  });
+
+  // Raise error if member list is over 6 hours old
+  fs.stat("members.csv", (err, stats) => {
+    if (!err) {
+      const { mtime } = stats;
+
+      const memberListAge = Math.abs(new Date() - mtime);
+      const diffHours = Math.ceil(memberListAge / (1000 * 60 * 60));
+
+      monitorError({
+        type: "memberList",
+        isInError: diffHours > 6,
+        errorMessage: "members.csv is over 6 hours old",
+      });
+    }
+  });
 };
 
 /**
@@ -339,9 +389,7 @@ setInterval(() => {
   const d = new Date();
   const seconds = d.getSeconds();
   const millis = d.getMilliseconds();
-  const flash =
-    seconds % 2 &&
-    ((millis < 50) || (millis > 500 && millis < 550));
+  const flash = seconds % 2 && (millis < 50 || (millis > 500 && millis < 550));
 
   gpio_led_run.write(seconds % 2);
   gpio_led_error.write(errorLogPresent ? +flash : 0);

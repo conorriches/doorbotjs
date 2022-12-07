@@ -24,13 +24,13 @@ export default class Telegram {
     });
 
     // Matches "/hello [whatever]"
-    this.bot.onText(/\/hello (.+)/, (msg, match) => {
+    this.bot.onText(/\/hello\s?(.+)?/, (msg, match) => {
       if (this.chatId != msg.chat.id) return;
 
       const arg = match[1]; // the captured "whatever"
       const resp = arg ? `Sup, ${arg}!` : "";
       const reply = `${resp}${this.randomEmoji()}${this.randomEmoji()}${this.randomEmoji()}${this.randomEmoji()}${this.randomEmoji()}`;
-      bot.sendMessage(this.chatId, `${reply} ${this.randomEmoji()}`);
+      this.bot.sendMessage(this.chatId, `${reply} ${this.randomEmoji()}`);
     });
   }
 

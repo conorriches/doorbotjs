@@ -59,7 +59,7 @@ export default class Lcd {
           this.lcd.printLineSync(1, "Check internet");
           break;
         default:
-          this.lcd.printLineSync(0, "Unknown Error:");
+          this.lcd.printLineSync(0, "Error occurred:");
           this.lcd.printLineSync(1, this.errorType);
       }
       this.lcd.display();

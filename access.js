@@ -331,6 +331,7 @@ const monitorError = ({ type, isInError, errorMessage = "" }) => {
   // Handle resetting of status
   if (!errors[type]["status"] && errors[type]["notified"]) {
     errors[type]["notified"] = false;
+    lcdDisplay.setErrorType();
   }
 };
 

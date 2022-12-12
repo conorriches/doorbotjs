@@ -7,21 +7,30 @@ export default class Lcd {
   static ERR_OLD_MEMBER_LIST = "memberList";
 
   constructor() {
-    this.lcd = new LCD(1, 0x27, 16, 2);
+    this.enabled = false;
+
+    try{
+      this.lcd = new LCD(1, 0x27, 16, 2);
+      this.enabled = true;
+      this.lcd.beginSync();
+      this.lcd.clearSync();
+      this.lcd.noDisplay();
+    }catch(e){ console.log("Can't connect to LCD") }
+
     this.errorType = "";
     this.timeout = 0;
-
-    this.lcd.beginSync();
-    this.lcd.clearSync();
-    this.lcd.noDisplay();
   }
 
   setErrorType(errorType = "") {
+    if(!this.enabled) return;
+
     this.errorType = errorType;
     this.showDefaultScreen();
   }
 
   showMessage({ line1 = "", line2 = "", duration = 8000 }) {
+    if(!this.enabled) return;
+
     clearTimeout(this.timeout);
 
     this.lcd.clearSync();
@@ -36,6 +45,8 @@ export default class Lcd {
   }
 
   welcomeMember(announceName) {
+    if(!this.enabled) return;
+
     const greetings = ["Howdy", "Hello", "Heya", "Hi", "Greeting", "Welcome"];
     this.showMessage({
       line1: greetings[Math.floor(Math.random() * (greetings.length + 1))] + ",",
@@ -44,6 +55,8 @@ export default class Lcd {
   }
   
   showDefaultScreen() {
+    if(!this.enabled) return;
+
     // Don't interrupt a message being shown
     if (this.timeout) return;
 

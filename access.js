@@ -144,7 +144,6 @@ const fobReader = new Wiegand({
   validateCallback: (code) => validate({ entryCode: code, isKeycode: false }),
 });
 const lcdDisplay = new Lcd();
-lcdDisplay.showMessage({ line1: "HELLO WORLD", line2: "I'm alive!" });
 
 /**
  * Watch inputs

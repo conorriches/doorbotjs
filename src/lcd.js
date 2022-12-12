@@ -13,8 +13,8 @@ export default class Lcd {
       this.lcd = new LCD(1, 0x27, 16, 2);
       this.lcd.beginSync();
       this.lcd.clearSync();
-      this.lcd.noDisplay();
       this.enabled = true;
+      this.showMessage({ line1: "HELLO WORLD", line2: "I'm alive!" });
     }catch(e){ console.log("Can't connect to LCD") }
 
     this.errorType = "";

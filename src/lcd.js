@@ -11,10 +11,10 @@ export default class Lcd {
 
     try{
       this.lcd = new LCD(1, 0x27, 16, 2);
-      this.enabled = true;
       this.lcd.beginSync();
       this.lcd.clearSync();
       this.lcd.noDisplay();
+      this.enabled = true;
     }catch(e){ console.log("Can't connect to LCD") }
 
     this.errorType = "";

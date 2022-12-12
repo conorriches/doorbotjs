@@ -14,7 +14,7 @@ export default class Lcd {
       this.lcd.beginSync();
       this.lcd.clearSync();
       this.enabled = true;
-      this.showMessage({ line1: "HELLO WORLD", line2: "I'm alive!" });
+      this.showMessage({ line1: "HELLO WORLD", line2: "I'm alive!", duration: 5000});
     }catch(e){ console.log("Can't connect to LCD") }
 
     this.errorType = "";
@@ -28,7 +28,7 @@ export default class Lcd {
     this.showDefaultScreen();
   }
 
-  showMessage({ line1 = "", line2 = "", duration = 8000 }) {
+  showMessage({ line1 = "", line2 = "", duration = 20000 }) {
     if(!this.enabled) return;
 
     clearTimeout(this.timeout);

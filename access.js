@@ -184,51 +184,53 @@ const denyEntry = () => {
  * @param {boolean} isKeycode Whether it's a keycode
  */
 const entryCodeExistsInMemberlist = ({ entryCode, isKeycode = false }) => {
-  fs.readFile("members.csv", "utf8", (err, data) => {
-    if (err) {
-      logger.info({
-        action: "CHECKMEMBERS",
-        message: "Couldn't read members file",
-      });
-      return false;
-    }
-
-    parse(data, function (err, records) {
+  return new Promise((resolve, reject) => {
+    fs.readFile("members.csv", "utf8", (err, data) => {
       if (err) {
         logger.info({
           action: "CHECKMEMBERS",
-          message: "Couldn't parse members file",
+          message: "Couldn't read members file",
         });
-        return false;
+        return reject();
       }
 
-      records.forEach((record) => {
-        // Note! memberId could be null as this may not be implemented immediately!
-        const [memberCodeId, announceName, memberId] = record;
-
-        if (isKeycode && memberCodeId.startsWith("ff")) {
-          if (memberCodeId.slice(2) === entryCode) {
-            return {
-              memberCodeId,
-              announceName,
-              memberId,
-            };
-          }
+      parse(data, function (err, records) {
+        if (err) {
+          logger.info({
+            action: "CHECKMEMBERS",
+            message: "Couldn't parse members file",
+          });
+          return reject();
         }
 
-        if (!isKeycode && !memberCodeId.startsWith("ff")) {
-          if (memberCodeId.slice(0, 8) == entryCode.slice(0, 8)) {
-            return {
-              memberCodeId,
-              announceName,
-              memberId,
-            };
+        records.forEach((record) => {
+          // Note! memberId could be null as this may not be implemented immediately!
+          const [memberCodeId, announceName, memberId] = record;
+
+          if (isKeycode && memberCodeId.startsWith("ff")) {
+            if (memberCodeId.slice(2) === entryCode) {
+              return resolve({
+                memberCodeId,
+                announceName,
+                memberId,
+              });
+            }
           }
-        }
+
+          if (!isKeycode && !memberCodeId.startsWith("ff")) {
+            if (memberCodeId.slice(0, 8) == entryCode.slice(0, 8)) {
+              return resolve({
+                memberCodeId,
+                announceName,
+                memberId,
+              });
+            }
+          }
+        });
+
+        // No records were found
+        return reject();
       });
-
-      // No records were found
-      return false;
     });
   });
 };
@@ -397,22 +399,22 @@ setInterval(() => {
   const millis = d.getMilliseconds();
   let flash = false;
 
-  // Blink Status LED 
+  // Blink Status LED
   gpio_led_run.write(seconds % 2);
 
   // Blink error LED
   const activeErrors = errorStatus();
   if (activeErrors > -1) {
-    const blinkCount = (activeErrors + 2);
+    const blinkCount = activeErrors + 2;
     const interval = 200;
     const len = interval * blinkCount;
-    flash = seconds % 2 && millis < len && millis.toString().padStart(3,'0').charAt(0) % 2 === 0
+    flash =
+      seconds % 2 &&
+      millis < len &&
+      millis.toString().padStart(3, "0").charAt(0) % 2 === 0;
   }
 
   gpio_led_error.write(errors["errorLog"] ? +flash : 0);
-
-  
-
 }, 50);
 
 /**

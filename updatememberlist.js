@@ -25,6 +25,7 @@ axios
       });
     }
     response.data.pipe(fs.createWriteStream(tempFile));
+    verifyFile();
   });
 
 /**
@@ -64,7 +65,3 @@ const verifyFile = () => {
     });
   });
 };
-
-/**
- * log error if memberlist is too old ( > 2h)
- */

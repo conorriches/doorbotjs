@@ -406,12 +406,12 @@ setInterval(() => {
   const activeErrors = errorStatus();
   if (activeErrors > -1) {
     const blinkCount = activeErrors + 2;
-    const interval = 200;
+    const interval = 300;
     const len = interval * blinkCount;
     flash =
       seconds % 2 &&
       millis < len &&
-      millis.toString().padStart(3, "0").charAt(0) % 2 === 0;
+      millis.toString().padStart(3, "0").charAt(0) % 3 === 0;
   }
 
   gpio_led_error.write(errors["errorLog"] ? +flash : 0);

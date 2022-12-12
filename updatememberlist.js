@@ -24,7 +24,7 @@ axios
         message: "Memberlist response wasn't a 200",
       });
     }
-    response.data.pipe(fs.createWriteStream(tempFile), () => {
+    response.data.pipe(fs.createWriteStream(tempFile)).on('close', () => {
       verifyFile();
     });
   });

@@ -55,7 +55,6 @@ const p_relay_1 = 8; // To gate lock (short release)
 const p_relay_2 = 9; // To strike lock (long release) (for future)
 const p_input_doorbell = 4;
 const p_input_rex = 27; // Request To Exit
-const p_buzz_outside = 18; // Small beeper behind keypad.
 
 // Led status - uses *** BCM mode ***
 const p_led_error = 5;
@@ -113,7 +112,6 @@ const gpio_doorbell = new Gpio(p_input_doorbell, "in", "falling", {
 const gpio_rex = new Gpio(p_input_rex, "in", "falling", {
   debounceTimeout: 10,
 });
-const gpio_rfid_beep = new Gpio(p_rfid_beep, "high", "none", { activeLow: true });
 const gpio_rfid_led = new Gpio(p_rfid_led, "high", "none", { activeLow: true });
 const gpio_led_error = new Gpio(p_led_error, "out");
 const gpio_led_run = new Gpio(p_led_run, "out");
@@ -121,7 +119,7 @@ const gpio_led_run = new Gpio(p_led_run, "out");
 /**
  * Instantiate Items
  */
-const buzzer_outside = new Buzzer(p_buzz_outside);
+const buzzer_outside = new Buzzer({ pin: p_rfid_beep });
 const lock = new Lock({
   gpio: gpio_relay_1,
   failsafe: config.get("locks.gate.failsafe"),
@@ -136,7 +134,9 @@ const keypad = new Keypad({
   rowPins: [p_keypad_r1, p_keypad_r2, p_keypad_r3, p_keypad_r4],
   colPins: [p_keypad_c1, p_keypad_c2, p_keypad_c3],
   validateCallback: (code) => validate({ entryCode: code, isKeycode: true }),
-  beepCallback: () => buzzer_outside.beep(), // TODO: not fucking this
+  beepCallback: () => {
+    buzzer_outside.beep();
+  },
 });
 const fobReader = new Wiegand({
   pinD0: p_rfid_d0,
@@ -168,8 +168,7 @@ const grantEntry = () => {
 };
 
 const denyEntry = () => {
-  gpio_rfid_beep.write(1);
-  setTimeout(() => gpio_rfid_beep.write(0), 3000);
+  buzzer_outside.beep({ duration: 3000, blocking: true });
 };
 
 /**
@@ -304,7 +303,11 @@ const ringDoorbell = () => {
 const requestToExit = () => {
   logger.info({ action: "REX", message: "A request to exit was made" });
   grantEntry();
-  lcdDisplay.showMessage({ line1: "Goodbye!", line2: "See you soon", duration: 8000});
+  lcdDisplay.showMessage({
+    line1: "Goodbye!",
+    line2: "See you soon",
+    duration: 8000,
+  });
 };
 
 /**

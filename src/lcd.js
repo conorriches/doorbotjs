@@ -49,7 +49,7 @@ export default class Lcd {
 
     const greetings = ["Howdy", "Hello", "Heya", "Hi", "Greeting", "Welcome"];
     this.showMessage({
-      line1: greetings[Math.floor(Math.random() * (greetings.length + 1))] + ",",
+      line1: greetings[Math.floor(Math.random() * (greetings.length))] + ",",
       line2: announceName,
     });
   }

@@ -10,7 +10,7 @@ export default class Buzzer {
     this.blocked = false;
   }
 
-  beep({ duration, blocking }) {
+  beep({ duration = 0, blocking = false }) {
     if (this.blocked) return;
     if (blocking) this.blocked = true;
     if (this.timeout) clearTimeout(this.timeout);

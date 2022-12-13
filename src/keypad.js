@@ -40,6 +40,7 @@ export default class Keypad {
     
     if (key === "#") { // Enter
       this.validateCallback(this.code);
+      this.clear();
     } else if(key == "*"){ // Clear
       this.beep();
       this.clear();

@@ -113,8 +113,8 @@ const gpio_doorbell = new Gpio(p_input_doorbell, "in", "falling", {
 const gpio_rex = new Gpio(p_input_rex, "in", "falling", {
   debounceTimeout: 10,
 });
-const gpio_rfid_beep = new Gpio(p_rfid_beep, "out");
-const gpio_rfid_led = new Gpio(p_rfid_led, "out");
+const gpio_rfid_beep = new Gpio(p_rfid_beep, "high", "none", { activeLow: true });
+const gpio_rfid_led = new Gpio(p_rfid_led, "high", "none", { activeLow: true });
 const gpio_led_error = new Gpio(p_led_error, "out");
 const gpio_led_run = new Gpio(p_led_run, "out");
 
@@ -304,7 +304,7 @@ const ringDoorbell = () => {
 const requestToExit = () => {
   logger.info({ action: "REX", message: "A request to exit was made" });
   grantEntry();
-  lcdDisplay.showMessage({ line1: "Goodbye!", line2: "See you soon" });
+  lcdDisplay.showMessage({ line1: "Goodbye!", line2: "See you soon", duration: 8000});
 };
 
 /**

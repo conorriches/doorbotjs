@@ -29,14 +29,17 @@ export default class Lcd {
    */
   checkConnected() {
     if (!this.lcd.began) {
-      this.lcd.begin().then(() => this.lcd.clear());
-      return;
+      this.lcd.beginSync();
+      this.lcd.clearSync();
+    } else {
+      try {
+        // Check the i2c bus is actually functioning
+        this.lcd.clearSync();
+      } catch (e) {
+        this.lcd.closeSync();
+        this.lcd.beginSync();
+      }
     }
-
-    // Check the i2c bus is actually functioning by calling home
-    this.lcd.clear().catch((e) => {
-      this.lcd.close().then(this.lcd.begin());
-    });
   }
 
   setErrorType(errorType = "") {
@@ -48,7 +51,6 @@ export default class Lcd {
 
   showMessage({ line1 = "", line2 = "", duration = 20000 }) {
     this.checkConnected();
-
     clearTimeout(this.timeout);
 
     this.lcd.clearSync();
@@ -64,7 +66,6 @@ export default class Lcd {
 
   welcomeMember(announceName) {
     this.checkConnected();
-
     const greetings = ["Howdy", "Hello", "Heya", "Hi", "Greeting", "Welcome"];
     this.showMessage({
       line1: greetings[Math.floor(Math.random() * greetings.length)] + ",",
@@ -74,7 +75,6 @@ export default class Lcd {
 
   showDefaultScreen() {
     this.checkConnected();
-
     // Don't interrupt a message being shown
     if (this.timeout) return;
 

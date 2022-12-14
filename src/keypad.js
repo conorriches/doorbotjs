@@ -37,12 +37,12 @@ export default class Keypad {
 
   keyPressed(key) {
     this.beep();
-    
+    this.lastUsed = Date.now();
+
     if (key === "#") { // Enter
-      this.validateCallback(this.code);
+      this.validateCallback(this.code.join(''));
       this.clear();
     } else if(key == "*"){ // Clear
-      this.beep();
       this.clear();
     } else {
       this.code.push(key);
@@ -53,6 +53,7 @@ export default class Keypad {
   checkTimeout() {
     if (this.lastUsed) {
       if (Date.now() - this.lastUsed > this.timeout) {
+        this.lastUsed = 0;
         code = [];
       }
     }

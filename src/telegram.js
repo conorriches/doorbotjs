@@ -48,7 +48,7 @@ export default class Telegram {
    * @param {string} user
    */
   announceEntry(user) {
-    const d = Date.now();
+    const d = new Date();
     const time =
       ("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2);
 

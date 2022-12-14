@@ -135,7 +135,7 @@ const keypad = new Keypad({
   colPins: [p_keypad_c1, p_keypad_c2, p_keypad_c3],
   validateCallback: (code) => validate({ entryCode: code, isKeycode: true }),
   beepCallback: () => {
-    buzzer_outside.beep({duration: 10});
+    buzzer_outside.beep({ duration: 10 });
   },
 });
 const fobReader = new Wiegand({
@@ -189,7 +189,7 @@ const entryCodeExistsInMemberlist = ({ entryCode, isKeycode = false }) => {
           action: "CHECKMEMBERS",
           message: "Couldn't read members file",
         });
-        return reject();
+        reject();
       }
 
       parse(data, function (err, records) {
@@ -198,7 +198,7 @@ const entryCodeExistsInMemberlist = ({ entryCode, isKeycode = false }) => {
             action: "CHECKMEMBERS",
             message: "Couldn't parse members file",
           });
-          return reject();
+          reject();
         }
 
         records.forEach((record) => {
@@ -207,7 +207,7 @@ const entryCodeExistsInMemberlist = ({ entryCode, isKeycode = false }) => {
 
           if (isKeycode && memberCodeId.startsWith("ff")) {
             if (memberCodeId.slice(2) === entryCode) {
-              return resolve({
+              resolve({
                 memberCodeId,
                 announceName,
                 memberId,
@@ -217,7 +217,7 @@ const entryCodeExistsInMemberlist = ({ entryCode, isKeycode = false }) => {
 
           if (!isKeycode && !memberCodeId.startsWith("ff")) {
             if (memberCodeId.slice(0, 8) == entryCode.slice(0, 8)) {
-              return resolve({
+              resolve({
                 memberCodeId,
                 announceName,
                 memberId,
@@ -227,7 +227,7 @@ const entryCodeExistsInMemberlist = ({ entryCode, isKeycode = false }) => {
         });
 
         // No records were found
-        return reject();
+        reject("no record found");
       });
     });
   });
@@ -252,39 +252,39 @@ const validate = ({ entryCode, isKeycode }) => {
     input: entryCode,
   });
 
-  let memberRecord = entryCodeExistsInMemberlist({
+  entryCodeExistsInMemberlist({
     entryCode: entryCode,
     isKeycode: isKeycode,
-  });
+  })
+    .then((memberRecord) => {
+      logger.info({
+        action: "ENTRY",
+        message: `Valid entry code from ${entryDevice}, unlocking door`,
+        input: memberRecord.memberId || memberRecord.memberCodeId,
+      });
+      grantEntry();
 
-  if (memberRecord) {
-    logger.info({
-      action: "ENTRY",
-      message: `Valid entry code from ${entryDevice}, unlocking door`,
-      input: memberRecord.memberId || memberRecord.memberCodeId,
+      lcdDisplay.welcomeMember(memberRecord.announceName);
+
+      const anonymous = ["anon", "Anon", "anonymous", "Anonymous"];
+      if (
+        !!memberRecord.announceName &&
+        anonymous.indexOf(memberRecord.announceName) == -1
+      ) {
+        telegram.announceEntry(memberRecord.announceName);
+      }
+
+      membershipSystem
+        .post("acs/activity", {
+          tagId: memberRecord.memberCodeId,
+          device: entryDevice,
+          occurredAt: "0",
+        })
+        .catch((error) => {});
+    })
+    .catch((e) => {
+      denyEntry();
     });
-    grantEntry();
-
-    lcdDisplay.welcomeMember(memberRecord.announceName);
-
-    const anonymous = ["anon", "Anon", "anonymous", "Anonymous"];
-    if (
-      !!memberRecord.announceName &&
-      anonymous.indexOf(memberRecord.announceName) == -1
-    ) {
-      telegram.announceEntry(memberRecord.announceName);
-    }
-
-    membershipSystem
-      .post("acs/activity", {
-        tagId: memberRecord.memberCodeId,
-        device: entryDevice,
-        occurredAt: "0",
-      })
-      .catch((error) => {});
-  } else {
-    denyEntry();
-  }
 };
 
 /**
@@ -328,7 +328,7 @@ const monitorError = ({ type, isInError, errorMessage = "" }) => {
         lcdDisplay.setErrorType(type);
       })
       .catch((_) => {
-        console.log("Error reporting error");
+        console.log("Error reporting error to telegram");
       });
   }
 

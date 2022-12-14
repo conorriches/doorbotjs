@@ -25,20 +25,17 @@ export default class Lcd {
   }
 
   /**
-   * Try to connect if not connected. Try 5 times to connect. 
-   * @param {int} retries number of retries so far
-   * @returns 
+   * Try to connect if not connected.
    */
-  checkConnected(retries = 0) {
+  checkConnected() {
     if (!this.lcd.began) {
       this.lcd.begin().then(() => this.lcd.clear());
       return;
     }
 
     // Check the i2c bus is actually functioning by calling home
-    this.lcd.home().catch((e) => {
-      if (retries > 5) return;
-      this.lcd.close().then(this.checkConnected(retries++));
+    this.lcd.clear().catch((e) => {
+      this.lcd.close().then(this.lcd.begin());
     });
   }
 

@@ -9,7 +9,7 @@ export default class Lcd {
   constructor() {
     try {
       this.lcd = new LCD(1, 0x27, 16, 2);
-      checkConnected();
+      this.checkConnected();
 
       this.showMessage({
         line1: "HELLO WORLD",
@@ -43,14 +43,14 @@ export default class Lcd {
   }
 
   setErrorType(errorType = "") {
-    checkConnected();
+    this.checkConnected();
 
     this.errorType = errorType;
     this.showDefaultScreen();
   }
 
   showMessage({ line1 = "", line2 = "", duration = 20000 }) {
-    checkConnected();
+    this.checkConnected();
 
     clearTimeout(this.timeout);
 
@@ -66,7 +66,7 @@ export default class Lcd {
   }
 
   welcomeMember(announceName) {
-    checkConnected();
+    this.checkConnected();
 
     const greetings = ["Howdy", "Hello", "Heya", "Hi", "Greeting", "Welcome"];
     this.showMessage({
@@ -76,7 +76,7 @@ export default class Lcd {
   }
 
   showDefaultScreen() {
-    checkConnected();
+    this.checkConnected();
 
     // Don't interrupt a message being shown
     if (this.timeout) return;

@@ -135,7 +135,7 @@ const keypad = new Keypad({
   colPins: [p_keypad_c1, p_keypad_c2, p_keypad_c3],
   validateCallback: (code) => validate({ entryCode: code, isKeycode: true }),
   beepCallback: () => {
-    buzzer_outside.beep();
+    buzzer_outside.beep({duration: 10});
   },
 });
 const fobReader = new Wiegand({

@@ -7,29 +7,50 @@ export default class Lcd {
   static ERR_OLD_MEMBER_LIST = "memberList";
 
   constructor() {
-    this.enabled = false;
-
-    try{
+    try {
       this.lcd = new LCD(1, 0x27, 16, 2);
-      this.lcd.beginSync();
-      this.lcd.clearSync();
-      this.enabled = true;
-      this.showMessage({ line1: "HELLO WORLD", line2: "I'm alive!", duration: 5000});
-    }catch(e){ console.log("Can't connect to LCD") }
+      checkConnected();
+
+      this.showMessage({
+        line1: "HELLO WORLD",
+        line2: "I'm alive!",
+        duration: 5000,
+      });
+    } catch (e) {
+      console.log("Can't connect to LCD", e);
+    }
 
     this.errorType = "";
     this.timeout = 0;
   }
 
+  /**
+   * Try to connect if not connected. Try 5 times to connect. 
+   * @param {int} retries number of retries so far
+   * @returns 
+   */
+  checkConnected(retries = 0) {
+    if (!this.lcd.began) {
+      this.lcd.begin().then(() => this.lcd.clear());
+      return;
+    }
+
+    // Check the i2c bus is actually functioning by calling home
+    this.lcd.home().catch((e) => {
+      if (retries > 5) return;
+      this.lcd.close().then(this.checkConnected(retries++));
+    });
+  }
+
   setErrorType(errorType = "") {
-    if(!this.enabled) return;
+    checkConnected();
 
     this.errorType = errorType;
     this.showDefaultScreen();
   }
 
   showMessage({ line1 = "", line2 = "", duration = 20000 }) {
-    if(!this.enabled) return;
+    checkConnected();
 
     clearTimeout(this.timeout);
 
@@ -45,17 +66,17 @@ export default class Lcd {
   }
 
   welcomeMember(announceName) {
-    if(!this.enabled) return;
+    checkConnected();
 
     const greetings = ["Howdy", "Hello", "Heya", "Hi", "Greeting", "Welcome"];
     this.showMessage({
-      line1: greetings[Math.floor(Math.random() * (greetings.length))] + ",",
+      line1: greetings[Math.floor(Math.random() * greetings.length)] + ",",
       line2: announceName,
     });
   }
-  
+
   showDefaultScreen() {
-    if(!this.enabled) return;
+    checkConnected();
 
     // Don't interrupt a message being shown
     if (this.timeout) return;

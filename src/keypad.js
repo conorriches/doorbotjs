@@ -44,6 +44,7 @@ export default class Keypad {
       this.clear();
     } else if(key == "*"){ // Clear
       this.clear();
+      setTimeout(this.beepCallback, 100);
     } else {
       this.code.push(key);
     }

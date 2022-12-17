@@ -15,7 +15,7 @@ import axios from "axios";
 
 import Wiegand from "./src/wiegand.js";
 import Keypad from "./src/keypad.js";
-import Buzzer from "./src/buzzer.js";
+import TimedOutput from "./src/timed_output.js";
 import Lock from "./src/lock.js";
 import Telegram from "./src/telegram.js";
 import Logger from "./src/logger.js";
@@ -112,14 +112,14 @@ const gpio_doorbell = new Gpio(p_input_doorbell, "in", "falling", {
 const gpio_rex = new Gpio(p_input_rex, "in", "falling", {
   debounceTimeout: 10,
 });
-const gpio_rfid_led = new Gpio(p_rfid_led, "high", "none", { activeLow: true });
 const gpio_led_error = new Gpio(p_led_error, "out");
 const gpio_led_run = new Gpio(p_led_run, "out");
 
 /**
  * Instantiate Items
  */
-const buzzer_outside = new Buzzer({ pin: p_rfid_beep });
+const buzzer_outside = new TimedOutput({ pin: p_rfid_beep });
+const led_outside = new TimedOutput({ pin: p_rfid_led });
 const lock = new Lock({
   gpio: gpio_relay_1,
   failsafe: config.get("locks.gate.failsafe"),
@@ -163,8 +163,8 @@ gpio_rex.watch((err) => {
 const grantEntry = () => {
   lock.trigger();
   strike.trigger();
-  gpio_rfid_led.write(1);
-  setTimeout(() => gpio_rfid_led.write(0), 5000);
+  led_outside.write(1);
+  setTimeout(() => led_outside.write(0), 5000);
   setTimeout(() => buzzer_outside.beep({ duration: 50 }), 100);
   setTimeout(() => buzzer_outside.beep({ duration: 50 }), 200);
   setTimeout(() => buzzer_outside.beep({ duration: 50 }), 300);

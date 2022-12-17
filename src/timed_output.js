@@ -2,7 +2,7 @@
 
 import { Gpio } from "onoff";
 
-export default class Buzzer {
+export default class TimedOutput {
   constructor({ pin, duration = 50 }) {
     this.timeout = 0;
     this.buzzer = new Gpio(pin, "high", "none", { activeLow: true });

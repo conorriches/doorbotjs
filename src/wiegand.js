@@ -8,10 +8,6 @@ export default class Wiegand {
     this.fobReader.begin();
 
     this.fobReader.on("reader", (idDec, idRFID, idHex) => {
-      console.log(idDec); // RAW data
-      console.log(idRFID); // EM format
-      console.log(idHex); // Mifare format
-
       validateCallback(idHex);
     });
   }

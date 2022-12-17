@@ -8,7 +8,7 @@ const emojis = [
 
 export default class Telegram {
   constructor({ apiKey, chatId }) {
-    this.bot = new TelegramBot(apiKey, { polling: true });
+    this.bot = new TelegramBot(apiKey, { polling: { interval: 5000 } });
     this.chatId = chatId;
     this.lastEnteredName = "";
     this.lastMessageString = "";
@@ -16,11 +16,11 @@ export default class Telegram {
 
     // If something goes wrong with telegram it's not a big deal
     this.bot.on("polling_error", (error) => {
-      console.log(error.code);
+      console.log("Telegram Polling Error", error.code, error);
     });
 
-    this.bot.on("webhook_error", (error) => {
-      console.log(error.code);
+    this.bot.on("error", (error) => {
+      console.log("Telegram General Error", error.code, error);
     });
 
     // Matches "/hello [whatever]"
@@ -52,10 +52,13 @@ export default class Telegram {
     const time =
       ("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2);
 
+    // Edit message if the same person has re-entered 
     if (user == this.lastEnteredName && this.lastMessageId) {
-      this.bot.editMessageText(`${this.lastMessageString} (${time})`, {
+      const newString = `${this.lastMessageString} (${time})`;
+      this.lastMessageString = newString;
+      this.bot.editMessageText(newString, {
         chat_id: this.chatId,
-        message_id: lastMessageId,
+        message_id: this.lastMessageId,
       });
     } else {
       const greeting = `🔑 ${user} entered the space! (${time})`;

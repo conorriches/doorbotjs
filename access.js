@@ -45,8 +45,8 @@ const p_keypad_c2 = 33;
 const p_keypad_c3 = 32;
 
 // Fob Reader - the Wiegand library uses *** BCM mode ***
-const p_rfid_d0 = 22;
-const p_rfid_d1 = 23;
+const p_rfid_d0 = 4;
+const p_rfid_d1 = 17;
 const p_rfid_beep = 24; // This beeper is loud but can't be used in short bursts
 const p_rfid_led = 25; // Inbuilt fob reader LED. Red when low, Green when high.
 
@@ -92,7 +92,7 @@ telegram.announceStartup();
  * Set up API for membership system
  */
 const membershipSystem = axios.create({
-  baseURL: "https://members.hacman.org.uk",
+  baseURL: "members.hacman.org.uk",
   timeout: 5000,
   headers: {
     ApiKey: config.get("members.apikey"),
@@ -135,7 +135,7 @@ const keypad = new Keypad({
   colPins: [p_keypad_c1, p_keypad_c2, p_keypad_c3],
   validateCallback: (code) => validate({ entryCode: code, isKeycode: true }),
   beepCallback: () => {
-    buzzer_outside.beep({ duration: 10 });
+    buzzer_outside.beep({ duration: 50 });
   },
 });
 const fobReader = new Wiegand({
@@ -164,11 +164,14 @@ const grantEntry = () => {
   lock.trigger();
   strike.trigger();
   gpio_rfid_led.write(1);
-  setTimeout(() => gpio_rfid_led.write(0), 3000);
+  setTimeout(() => gpio_rfid_led.write(0), 5000);
+  setTimeout(() => buzzer_outside.beep({ duration: 50 }), 100);
+  setTimeout(() => buzzer_outside.beep({ duration: 50 }), 200);
+  setTimeout(() => buzzer_outside.beep({ duration: 50 }), 300);
 };
 
 const denyEntry = () => {
-  buzzer_outside.beep({ duration: 3000, blocking: true });
+  buzzer_outside.beep({ duration: 5000, blocking: true });
 };
 
 /**
@@ -253,7 +256,7 @@ const validate = ({ entryCode, isKeycode }) => {
   });
 
   entryCodeExistsInMemberlist({
-    entryCode: entryCode,
+    entryCode: entryCode.toLowerCase(),
     isKeycode: isKeycode,
   })
     .then((memberRecord) => {
@@ -283,6 +286,7 @@ const validate = ({ entryCode, isKeycode }) => {
         .catch((error) => {});
     })
     .catch((e) => {
+      console.log("Entry denied or error granting entry", e)
       denyEntry();
     });
 };

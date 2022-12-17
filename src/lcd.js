@@ -16,30 +16,34 @@ export default class Lcd {
         line2: "I'm alive!",
         duration: 5000,
       });
-    } catch (e) {
-      console.log("Can't connect to LCD", e);
-    }
+    } catch (e) {}
 
     this.errorType = "";
     this.timeout = 0;
   }
 
+  begin() {
+    try {
+      this.lcd.beginSync();
+      this.lcd.clearSync();
+    } catch (_) {}
+  }
   /**
    * Try to connect if not connected.
    */
   checkConnected() {
-    if (!this.lcd.began) {
-      this.lcd.beginSync();
-      this.lcd.clearSync();
-    } else {
-      try {
-        // Check the i2c bus is actually functioning
-        this.lcd.clearSync();
-      } catch (e) {
-        this.lcd.closeSync();
-        this.lcd.beginSync();
+    try {
+      if (!this.lcd.began) {
+        this.begin();
+      } else {
+        try {
+          // Check the i2c bus is actually functioning
+          this.lcd.clearSync();
+        } catch (e) {
+          this.begin();
+        }
       }
-    }
+    } catch (_) {}
   }
 
   setErrorType(errorType = "") {

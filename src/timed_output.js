@@ -5,19 +5,19 @@ import { Gpio } from "onoff";
 export default class TimedOutput {
   constructor({ pin, duration = 50 }) {
     this.timeout = 0;
-    this.buzzer = new Gpio(pin, "high", "none", { activeLow: true });
+    this.output = new Gpio(pin, "high", "none", { activeLow: true });
     this.duration = duration;
     this.blocked = false;
   }
 
-  beep({ duration = 0, blocking = false }) {
+  trigger({ duration = 0, blocking = false }) {
     if (this.blocked) return;
     if (blocking) this.blocked = true;
     if (this.timeout) clearTimeout(this.timeout);
 
-    this.buzzer.write(1, () => {
+    this.output.write(1, () => {
       this.timeout = setTimeout(() => {
-        this.buzzer.write(0);
+        this.output.write(0);
         this.timeout = 0;
         this.blocked = false;
       }, duration || this.duration);

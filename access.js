@@ -135,7 +135,7 @@ const keypad = new Keypad({
   colPins: [p_keypad_c1, p_keypad_c2, p_keypad_c3],
   validateCallback: (code) => validate({ entryCode: code, isKeycode: true }),
   beepCallback: () => {
-    buzzer_outside.beep({ duration: 50 });
+    buzzer_outside.trigger({ duration: 50 });
   },
 });
 const fobReader = new Wiegand({
@@ -163,15 +163,14 @@ gpio_rex.watch((err) => {
 const grantEntry = () => {
   lock.trigger();
   strike.trigger();
-  led_outside.write(1);
-  setTimeout(() => led_outside.write(0), 5000);
-  setTimeout(() => buzzer_outside.beep({ duration: 50 }), 100);
-  setTimeout(() => buzzer_outside.beep({ duration: 50 }), 200);
-  setTimeout(() => buzzer_outside.beep({ duration: 50 }), 300);
+  led_outside.trigger({ duration: 5000 });
+  setTimeout(() => buzzer_outside.trigger({ duration: 50 }), 100);
+  setTimeout(() => buzzer_outside.trigger({ duration: 50 }), 200);
+  setTimeout(() => buzzer_outside.trigger({ duration: 50 }), 300);
 };
 
 const denyEntry = () => {
-  buzzer_outside.beep({ duration: 5000, blocking: true });
+  buzzer_outside.trigger({ duration: 5000, blocking: true });
 };
 
 /**
@@ -286,7 +285,7 @@ const validate = ({ entryCode, isKeycode }) => {
         .catch((error) => {});
     })
     .catch((e) => {
-      console.log("Entry denied or error granting entry", e)
+      console.log("Entry denied or error granting entry", e);
       denyEntry();
     });
 };

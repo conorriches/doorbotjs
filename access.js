@@ -64,7 +64,7 @@ const p_led_run = 7;
  * This logs to level INFO only - e.g. entry logs are recorded to a rotating log
  * ERROR logs are managed my PM2 as this will include the whole program crashing
  */
-const logger = new Logger();
+const logger = new Logger({ process: "access" });
 
 /**
  * Log that we have life

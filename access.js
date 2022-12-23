@@ -16,7 +16,6 @@ import axios from "axios";
 import Wiegand from "./src/wiegand.js";
 import Keypad from "./src/keypad.js";
 import TimedOutput from "./src/timed_output.js";
-import Lock from "./src/lock.js";
 import Telegram from "./src/telegram.js";
 import Logger from "./src/logger.js";
 import Lcd from "./src/lcd.js";
@@ -104,13 +103,11 @@ const membershipSystem = axios.create({
  * For GPIO used in this file, set up onoff
  * Other pins above may be used by libraries only
  */
-const gpio_relay_1 = new Gpio(p_relay_1, "high", "none", { activeLow: true });
-const gpio_relay_2 = new Gpio(p_relay_2, "high", "none", { activeLow: true });
 const gpio_doorbell = new Gpio(p_input_doorbell, "in", "falling", {
-  debounceTimeout: 10,
+  debounceTimeout: 100,
 });
 const gpio_rex = new Gpio(p_input_rex, "in", "falling", {
-  debounceTimeout: 10,
+  debounceTimeout: 100,
 });
 const gpio_led_error = new Gpio(p_led_error, "out");
 const gpio_led_run = new Gpio(p_led_run, "out");
@@ -120,14 +117,12 @@ const gpio_led_run = new Gpio(p_led_run, "out");
  */
 const buzzer_outside = new TimedOutput({ pin: p_rfid_beep });
 const led_outside = new TimedOutput({ pin: p_rfid_led });
-const lock = new Lock({
-  gpio: gpio_relay_1,
-  failsafe: config.get("locks.gate.failsafe"),
+const lock = new TimedOutput({
+  pin: p_relay_1,
   duration: config.get("locks.gate.duration"),
 });
-const strike = new Lock({
-  gpio: gpio_relay_2,
-  failsafe: config.get("locks.gate.failsafe"),
+const strike = new TimedOutput({
+  gpio: p_relay_2,
   duration: config.get("locks.strike.duration"),
 });
 const keypad = new Keypad({

@@ -5,7 +5,7 @@ const { combine, timestamp, label, printf } = format;
 import "winston-daily-rotate-file";
 
 class Logger {
-  constructor() {
+  constructor({process = "access"}) {
     const myFormat = printf(({ message, action, timestamp, input }) => {
       const inputStr = input ? ` [INPUT: ${input}]` : "";
       return `${timestamp} [${action}]${inputStr}: ${message}`;
@@ -16,7 +16,7 @@ class Logger {
       transports: [
         new transports.DailyRotateFile({
           level: "info",
-          filename: "./logs/info/%DATE%.log",
+          filename: `./logs/info/%DATE%-${process}.log`,
           datePattern: "YYYY-MM-DD",
           maxFiles: "30d",
         }),

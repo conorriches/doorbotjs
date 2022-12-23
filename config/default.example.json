@@ -1,12 +1,10 @@
 {
   "locks": {
     "gate": {
-      "duration": 500,
-      "failsafe": false
+      "duration": 500
     },
     "strike": {
-      "duration": 10000,
-      "failsafe": false
+      "duration": 10000
     }
   },
   "telegram": {

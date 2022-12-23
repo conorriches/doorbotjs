@@ -4,7 +4,7 @@ import Logger from "./src/logger.js";
 import { parse } from "csv-parse";
 import axios from "axios";
 
-const logger = new Logger();
+const logger = new Logger({process: "updatememberlist"});
 const tempFile = "temp/members.csv";
 const membersFile = "members.csv";
 const key = config.get("members.querykey");
@@ -23,10 +23,15 @@ axios
         action: "DOWNLOAD",
         message: "Memberlist response wasn't a 200",
       });
+      throw "BadStatus"
     }
     response.data.pipe(fs.createWriteStream(tempFile)).on('close', () => {
       verifyFile();
     });
+  }).catch(e => {
+    // If we can't get a new memberlist, oh well.
+    // access.js will report if the memberlist goes too stale.
+    console.log(e);
   });
 
 /**
@@ -38,7 +43,7 @@ const verifyFile = () => {
   fs.readFile(tempFile, "utf8", (err, data) => {
     if (err) {
       logger.info({
-        action: "DOWNLOAD",
+        action: "READ",
         message: "Couldn't read temporary members file",
       });
       return;
@@ -46,23 +51,29 @@ const verifyFile = () => {
 
     if (data.length == 0) {
       logger.info({
-        action: "DOWNLOAD",
+        action: "LENGTH",
         message: "Memberlist length was 0 (incorrect API key?)",
       });
       return;
     }
 
     parse(data, function (err, records) {
-      if (!err) {
-        fs.writeFile(membersFile, data, (err) => {
-          if (err) {
-            logger.info({
-              action: "DOWNLOAD",
-              message: "Error writing new members file",
-            });
-          }
+      if (err) {
+        logger.info({
+          action: "PARSE",
+          message: "Error parsing new members file",
         });
+        return;
       }
+
+      fs.writeFile(membersFile, data, (err) => {
+        if (err) {
+          logger.info({
+            action: "WRITE",
+            message: "Error writing new members file",
+          });
+        }
+      });
     });
   });
 };

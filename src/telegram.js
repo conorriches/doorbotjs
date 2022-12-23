@@ -22,6 +22,13 @@ export default class Telegram {
     this.bot.on("error", (error) => {
       console.log("Telegram General Error", error.code, error);
     });
+    this.bot.on('uncaughtException', function (error) {
+      console.log("Telegram Uncaught Exception", error);
+    });
+    this.bot.on('unhandledRejection', function (error, p) {
+      console.log("Telegram Unhandled Rejection", error.message);
+    });
+
 
     // Matches "/hello [whatever]"
     this.bot.onText(/\/hello\s?(.+)?/, (msg, match) => {

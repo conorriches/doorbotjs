@@ -122,7 +122,7 @@ const lock = new TimedOutput({
   duration: config.get("locks.gate.duration"),
 });
 const strike = new TimedOutput({
-  gpio: p_relay_2,
+  pin: p_relay_2,
   duration: config.get("locks.strike.duration"),
 });
 const keypad = new Keypad({

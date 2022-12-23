@@ -10,7 +10,7 @@ export default class TimedOutput {
     this.blocked = false;
   }
 
-  trigger({ duration = 0, blocking = false }) {
+  trigger({ duration = 0, blocking = false } = {}) {
     if (this.blocked) return;
     if (blocking) this.blocked = true;
     if (this.timeout) clearTimeout(this.timeout);

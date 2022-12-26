@@ -52,7 +52,7 @@ const p_rfid_led = 25; // Inbuilt fob reader LED. Red when low, Green when high.
 // Auxiliary - uses *** BCM mode ***
 const p_relay_1 = 8; // To gate lock (short release)
 const p_relay_2 = 9; // To strike lock (long release) (for future)
-const p_input_doorbell = 4;
+const p_input_doorbell = 23;
 const p_input_rex = 27; // Request To Exit
 
 // Led status - uses *** BCM mode ***
@@ -158,7 +158,7 @@ gpio_rex.watch((err) => {
 const grantEntry = () => {
   lock.trigger();
   strike.trigger();
-  led_outside.trigger({ duration: 5000 });
+  led_outside.trigger({ duration: 5000, blocking: true });
   setTimeout(() => buzzer_outside.trigger({ duration: 50 }), 100);
   setTimeout(() => buzzer_outside.trigger({ duration: 50 }), 200);
   setTimeout(() => buzzer_outside.trigger({ duration: 50 }), 300);
@@ -401,7 +401,8 @@ setInterval(() => {
 
   // Blink Status LED
   gpio_led_run.write(seconds % 2);
-
+  if (millis < 50 && seconds % 10 ==0) led_outside.trigger({duration: 20});
+  
   // Blink error LED
   const activeErrors = errorStatus();
   if (activeErrors > -1) {

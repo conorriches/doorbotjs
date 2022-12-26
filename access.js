@@ -290,7 +290,7 @@ const validate = ({ entryCode, isKeycode }) => {
  * Maybe add an easter egg - 1/10 chance it also plays a chicken squark :D
  */
 const ringDoorbell = () => {
-  //TODO
+  telegram.announceDoorbell();
   logger.info({ action: "DOORBELL", message: "The doorbell was rung" });
 };
 

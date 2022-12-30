@@ -8,14 +8,14 @@ export default class Wiegand {
     this.fobReader.begin();
 
     this.fobReader.on("reader", (idDec, idRFID, idHex) => {
-      validateCallback(convert(idDec));
+      validateCallback(this.convert(idDec));
     });
   }
 
   convert(decimal){
     let hex = decimal.toString(16);
     hex = hex.replace(/^(.(..)*)$/, "0$1");
-    let arr = s.match(/../g);
+    let arr = hex.match(/../g);
     arr.reverse();
     return arr.join("")
   }

@@ -213,7 +213,7 @@ const entryCodeExistsInMemberlist = ({ entryCode, isKeycode = false }) => {
           }
 
           if (!isKeycode && !memberCodeId.startsWith("ff")) {
-            if (memberCodeId.slice(0, 8) == entryCode.slice(0, 8)) {
+            if (memberCodeId.slice(0, 6) == entryCode.slice(0, 6)) {
               resolve({
                 memberCodeId,
                 announceName,
@@ -236,7 +236,7 @@ const entryCodeExistsInMemberlist = ({ entryCode, isKeycode = false }) => {
  * @param {string} entryCode the code to validate
  */
 const validate = ({ entryCode, isKeycode }) => {
-  if (entryCode.length < 8) {
+  if (entryCode.length < 6) {
     denyEntry();
     return;
   }
@@ -402,7 +402,6 @@ setInterval(() => {
   // Blink Status LED
   gpio_led_run.write(seconds % 2);
   if (millis < 50 && seconds % 10 ==0) led_outside.trigger({duration: 20});
-  
   // Blink error LED
   const activeErrors = errorStatus();
   if (activeErrors > -1) {

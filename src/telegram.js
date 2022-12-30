@@ -52,7 +52,7 @@ export default class Telegram {
           text: greeting,
         })
         .then((msg) => {
-          this.lastMessageId = msg.message_id;
+          this.lastMessageId = msg.data.result.message_id;
           this.lastMessageString = greeting;
           this.lastEnteredName = user;
         });

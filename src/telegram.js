@@ -20,7 +20,15 @@ export default class Telegram {
     this.client.post("/sendMessage", {
       chat_id: this.chatId,
       text: "🤖 The doorbot was started!",
-    });
+    }).catch(()=>{});
+  }
+
+  announceMessage(text) {
+    this.client.post("/sendMessage", {
+      chat_id: this.chatId,
+      parse_mode: 'HTML',
+      text
+    })
   }
 
   /**
@@ -42,20 +50,21 @@ export default class Telegram {
         chat_id: this.chatId,
         message_id: this.lastMessageId,
         text: newString,
-      });
+      }).catch(()=>{});
     } else {
-      const greeting = `🔑 ${user} (${time})`;
+      const greeting = `🔑 ${decodeURIComponent(user)} (${time})`;
 
       this.client
         .post("/sendMessage", {
           chat_id: this.chatId,
           text: greeting,
+          disable_notification: true,
         })
         .then((msg) => {
           this.lastMessageId = msg.data.result.message_id;
           this.lastMessageString = greeting;
           this.lastEnteredName = user;
-        });
+        }).catch(()=>{});
     }
   }
 

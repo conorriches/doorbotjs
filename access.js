@@ -12,6 +12,7 @@ import config from "config";
 import { Gpio } from "onoff";
 import { parse } from "csv-parse";
 import axios from "axios";
+import ical from "node-ical";
 
 import Wiegand from "./src/wiegand.js";
 import Keypad from "./src/keypad.js";
@@ -225,6 +226,13 @@ const entryCodeExistsInMemberlist = ({ entryCode, isKeycode = false }) => {
 
         // No records were found
         reject("no record found");
+
+	lcdDisplay.showMessage({
+		line1: 'Unknown fob!',
+		line2: entryCode,
+		duration: 20000
+	});
+
       });
     });
   });
@@ -431,6 +439,41 @@ setInterval(() => {
 setInterval(() => {
   sendHeartbeat();
 }, 1000 * 60 * 5);
+
+
+// This is a bodge!!!!! Not committed to GH yet
+const nastyFootballAlertHack = async () => {
+  const data = await ical.async.fromURL(
+    "https://ics.fixtur.es/v2/home/manchester-city.ics"
+  );
+  try {
+    for (let k in data) {
+      if (data.hasOwnProperty(k)) {
+        const event = data[k];
+        if (event.type == "VEVENT") {
+          if (new Date(event.start).setHours(0,0,0,0) == new Date().setHours(0,0,0,0)) {
+            const e = {
+              date: new Date(event.start).toLocaleDateString("en-GB"),
+              start: new Date(event.start).toLocaleTimeString(),
+              end: new Date(event.end).toLocaleTimeString(),
+              title: event.summary
+            };
+
+            if(new Date() < new Date(event.end)){
+              telegram.announceMessage(`<b>Football Notice!</b>\nA football match is on today at the Etihad! \n\n<b>${e.title}</b> \n\n<b>Date:</b> ${e.date} \n<b>Start time:</b> ${e.start} \n<b>End time:</b> ${e.end} \n\n<i>Roads and public transport will be extremely busy before and after the event, and on street parking will be extremely limited.</i>`)
+            }
+          }
+        }
+      }
+    }
+  } catch (e) {
+    console.log(e);
+  }
+};
+
+setInterval(nastyFootballAlertHack, 1000 * 60 * 60 * 8)
+await nastyFootballAlertHack()
+
 
 /**
  * Startup activities

@@ -46,6 +46,7 @@ export default class Keypad {
       this.clear();
       setTimeout(this.beep, 100);
     } else {
+      console.log("Key pressed! [", key, "], code: ", this.code);
       this.code.push(key);
     }
   }

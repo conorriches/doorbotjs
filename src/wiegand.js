@@ -4,7 +4,7 @@ import WiegandReader from "wiegand-node";
 
 export default class Wiegand {
   constructor({ pinD0, pinD1, validateCallback }) {
-    this.fobReader = new WiegandReader({ d0: pinD0, d1: pinD1 });
+    this.fobReader = new WiegandReader({ d0: pinD0, d1: pinD1, debug: true });
     this.fobReader.begin();
 
     this.fobReader.on("reader", (idDec, idRFID, idHex) => {
@@ -17,6 +17,7 @@ export default class Wiegand {
     hex = hex.replace(/^(.(..)*)$/, "0$1");
     let arr = hex.match(/../g);
     arr.reverse();
+    console.log("keyfob arr", arr);
     return arr.join("")
   }
 }

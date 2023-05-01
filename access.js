@@ -15,7 +15,6 @@ import axios from "axios";
 import ical from "node-ical";
 
 import Wiegand from "./src/wiegand.js";
-import Keypad from "./src/keypad.js";
 import TimedOutput from "./src/timed_output.js";
 import Telegram from "./src/telegram.js";
 import Logger from "./src/logger.js";
@@ -34,15 +33,6 @@ let errors = {
  * Specify here where each thing is connected to.
  * IMPORTANT - NOTE whether it's a board pin number, or BCM pin number. lol.
  */
-
-// Keypad - the keypad library uses *** BOARD mode ***
-const p_keypad_r1 = 40;
-const p_keypad_r2 = 37;
-const p_keypad_r3 = 38;
-const p_keypad_r4 = 35;
-const p_keypad_c1 = 36;
-const p_keypad_c2 = 33;
-const p_keypad_c3 = 32;
 
 // Fob Reader - the Wiegand library uses *** BCM mode ***
 const p_rfid_d0 = 4;
@@ -126,18 +116,10 @@ const strike = new TimedOutput({
   pin: p_relay_2,
   duration: config.get("locks.strike.duration"),
 });
-const keypad = new Keypad({
-  rowPins: [p_keypad_r1, p_keypad_r2, p_keypad_r3, p_keypad_r4],
-  colPins: [p_keypad_c1, p_keypad_c2, p_keypad_c3],
-  validateCallback: (code) => validate({ entryCode: code, isKeycode: true }),
-  beepCallback: () => {
-    buzzer_outside.trigger({ duration: 50 });
-  },
-});
 const fobReader = new Wiegand({
   pinD0: p_rfid_d0,
   pinD1: p_rfid_d1,
-  validateCallback: (code) => validate({ entryCode: code, isKeycode: false }),
+  validateCallback: (code, isKeycode) => validate({ entryCode: code, isKeycode}),
 });
 const lcdDisplay = new Lcd();
 

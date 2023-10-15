@@ -6,7 +6,6 @@ If there's a difference between here and the labels, follow the wiring and check
 
 ## Components
 As is, there's space for:
-* 4x3 keypad, matrix input
 * Wiegand input (can be any device if it communicates over D0, D1)
 * 3 inputs
 * 2 outputs, both with NO and NC contacts
@@ -42,41 +41,6 @@ In all cases, all entrances and exits must conform to fire safety requirements.
     <td>2</td>
     <td>🔴 Power</td>
     <td>0v</td>
-</tr>
-<tr>
-    <td>3</td>
-    <td>🔵 Keypad</td>
-    <td>Row 1</td>
-</tr>
-<tr>
-    <td>4</td>
-    <td>🔵 Keypad</td>
-    <td>Row 2</td>
-</tr>
-<tr>
-    <td>5</td>
-    <td>🔵 Keypad</td>
-    <td>Row 3</td>
-</tr>
-<tr>
-    <td>6</td>
-    <td>🔵 Keypad</td>
-    <td>Row 4</td>
-</tr>
-<tr>
-    <td>7</td>
-    <td>🔵 Keypad</td>
-    <td>Col 1</td>
-</tr>
-<tr>
-    <td>8</td>
-    <td>🔵 Keypad</td>
-    <td>Col 2</td>
-</tr>
-<tr>
-    <td>9</td>
-    <td>🔵 Keypad</td>
-    <td>Col 3</td>
 </tr>
 <tr>
     <td>10</td>

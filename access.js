@@ -434,7 +434,10 @@ setInterval(() => {
 
 // Shout out if there's a football event on today
 const checkFootball = async () => {
-  footballCheck.checkFootball();
+  const event = footballCheck.checkFootball();
+  if (event) {
+    telegram.announceFootballEvent(event);
+  }
 };
 
 // We need to keep the bluetooth speaker awake, so we play a tiny sound occasionally

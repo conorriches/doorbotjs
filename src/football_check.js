@@ -20,28 +20,23 @@ export default class FootballCheck {
               new Date().setHours(0, 0, 0, 0)
             ) {
               if (new Date() < new Date(event.end)) {
-                this.announceFootballEvent(event);
+                return {
+                  date: new Date(event.start).toLocaleDateString("en-GB"),
+                  start: new Date(event.start).toLocaleTimeString(),
+                  end: new Date(event.end).toLocaleTimeString(),
+                  title: event.summary,
+                };
               }
             }
           }
         }
       }
+      return false;
+
     } catch (e) {
       // It's not critical if this fails, it's informational only
       console.log(e);
+      return false;
     }
-  }
-
-  announceFootballEvent(event) {
-    const formattedEvent = {
-      date: new Date(event.start).toLocaleDateString("en-GB"),
-      start: new Date(event.start).toLocaleTimeString(),
-      end: new Date(event.end).toLocaleTimeString(),
-      title: event.summary,
-    };
-
-    telegram.announceMessage(
-      `<b>Football Notice!</b>\nA football match is on today at the Etihad! \n\n<b>${formattedEvent.title}</b> \n\n<b>Date:</b> ${formattedEvent.date} \n<b>Start time:</b> ${formattedEvent.start} \n<b>End time:</b> ${formattedEvent.end} \n\n<i>Roads and public transport will be extremely busy before and after the event, and on street parking will be extremely limited.</i>`
-    );
   }
 }

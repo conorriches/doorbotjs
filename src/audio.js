@@ -11,6 +11,10 @@ export default class Audio {
     this.customSoundDirectory = "custom";
     this.entrySound = "metrolink.wav";
     this.wakeSound = "wake.wav";
+    this.minutesCoolOff = 5;
+
+    // e.g. [{ fileName: "", lastPlayed: Date.now() }]
+    this.rateLimitedFiles = [];
   }
 
   // Whenever anyone enters
@@ -27,7 +31,13 @@ export default class Audio {
     });
   }
 
+  // Rate limited playing of custom sounds
   playCustomSound(fileName) {
+    this.updateRateLimitedFiles();
+
+    // Don't play file if it's within rate limit
+    if (this.rateLimitedFileIndex(fileName) > -1) return;
+
     const filePath = path.join(
       this.soundDirectory,
       this.customSoundDirectory,
@@ -35,14 +45,38 @@ export default class Audio {
     );
 
     fs.access(filePath, fs.F_OK, (err) => {
-      if (err) {
-        console.log(err);
-        return;
-      }
+      if (err) return; // File doesn't exist
 
       player.play({
         path: filePath,
       });
+
+      // Mark file as played
+      this.rateLimitedFiles.push({
+        fileName: fileName,
+        lastPlayed: Date.now(),
+      });
     });
+  }
+
+  /**
+   * Updates the internal list of recently played (thus banned) files
+   */
+  updateRateLimitedFiles() {
+    this.rateLimitedFiles = this.rateLimitedFiles.filter((record) => {
+      Date.now - record.lastPlayed < this.minutesCoolOff * 1000 * 60;
+    });
+  }
+
+  /**
+   * @param {string} fileName
+   * @returns index of the file or -1 if it's not recorded
+   */
+  rateLimitedFileIndex(fileName) {
+    let index = this.rateLimitedFiles.findIndex(
+      (obj) => obj.fileName == fileName
+    );
+
+    return index;
   }
 }

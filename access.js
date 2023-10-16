@@ -154,8 +154,6 @@ const grantEntry = () => {
   setTimeout(() => buzzer_outside.trigger({ duration: 20 }), SECOND);
   setTimeout(() => buzzer_outside.trigger({ duration: 20 }), SECOND * 2);
   setTimeout(() => buzzer_outside.trigger({ duration: 20 }), SECOND * 3);
-
-  audio.playEntrySound();
 };
 
 const denyEntry = () => {
@@ -260,12 +258,19 @@ const validate = ({ entryCode, isKeycode }) => {
       logger.info({
         action: "ENTRY",
         message: `Valid entry code from ${entryDevice}, unlocking door`,
-        input: memberRecord.memberId || memberRecord.memberCodeId,
+        input: memberRecord.memberCodeId,
+        memberID: memberRecord.memberId,
       });
       grantEntry();
 
       lcdDisplay.welcomeMember(memberRecord.announceName);
+      audio.playEntrySound();
+      setTimeout(
+        () => audio.playCustomSound(`${memberRecord.memberId}.wav`),
+        SECOND * 2
+      );
 
+      // Folk were told they could use anon instead of nothing back when the field was mandatory
       const anonymous = ["anon", "Anon", "anonymous", "Anonymous"];
       if (
         !!memberRecord.announceName &&
@@ -273,14 +278,6 @@ const validate = ({ entryCode, isKeycode }) => {
       ) {
         telegram.announceEntry(memberRecord.announceName);
       }
-
-      membershipSystem
-        .post("acs/activity", {
-          tagId: memberRecord.memberCodeId,
-          device: entryDevice,
-          occurredAt: "0",
-        })
-        .catch((error) => {});
     })
     .catch((e) => {
       console.log("Entry denied or error granting entry", e);

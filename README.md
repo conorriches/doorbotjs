@@ -3,8 +3,7 @@
 
 ## Features
 ### Inputs
-* Keypad (4x3 matrix)
-* Wiegand device - such as a fob reader (13.56mhz/125khz)
+* Wiegand device - combined fob reader with keypad (13.56mhz/125khz)
 * Three user inputs
   * Doorbell
   * Request to Exit

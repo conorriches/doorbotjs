@@ -266,14 +266,6 @@ const validate = ({ entryCode, isKeycode }) => {
       lcdDisplay.welcomeMember(memberRecord.announceName);
       audio.playEntrySound();
 
-      // Play custom sound if member ID is implemented
-      if (memberRecord.memberId) {
-        setTimeout(
-          () => audio.playCustomSound(`${memberRecord.memberId}.wav`),
-          SECOND * 2
-        );
-      }
-
       // Folk were told they could use anon instead of nothing back when the field was mandatory
       const anonymous = ["anon", "Anon", "anonymous", "Anonymous"];
       if (
@@ -281,6 +273,14 @@ const validate = ({ entryCode, isKeycode }) => {
         anonymous.indexOf(memberRecord.announceName) == -1
       ) {
         telegram.announceEntry(memberRecord.announceName);
+        
+        // Play custom sound if member ID is implemented
+        if (memberRecord.memberId) {
+          setTimeout(
+            () => audio.playCustomSound(`${memberRecord.memberId}.wav`),
+            SECOND * 2
+          );
+        }
       }
     })
     .catch((e) => {

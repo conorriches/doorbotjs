@@ -4,3 +4,4 @@ config
 logs
 package-lock.json
 members.csv
+sounds/custom

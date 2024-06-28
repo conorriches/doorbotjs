@@ -305,6 +305,7 @@ const ringDoorbell = () => {
 const requestToExit = () => {
   logger.info({ action: "REX", message: "A request to exit was made" });
   grantEntry();
+  audio.playExitSound();
   lcdDisplay.showMessage({
     line1: "Goodbye!",
     line2: "See you soon",
@@ -439,14 +440,14 @@ setInterval(() => {
 // Shout out if there's a football event on today
 const checkFootball = async () => {
   const event = footballCheck.checkFootball();
-  if (event) {
-    telegram.announceFootballEvent(event);
-  }
+  //if (event) {
+  //  telegram.announceFootballEvent(event);
+  //}
 };
 
 // We need to keep the bluetooth speaker awake, so we play a tiny sound occasionally
 const wakeSpeaker = () => {
-  audio.playWakeSound();
+  //audio.playWakeSound();
 };
 
 // Just an easter egg

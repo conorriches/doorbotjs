@@ -7,7 +7,7 @@ import player from "node-wav-player";
 
 export default class Audio {
   constructor() {
-    this.soundDirectory = "../sounds";
+    this.soundDirectory = "sounds";
     this.customSoundDirectory = "custom";
     this.entrySound = "metrolink.wav";
     this.wakeSound = "wake.wav";
@@ -28,6 +28,33 @@ export default class Audio {
   playWakeSound() {
     player.play({
       path: path.join(this.soundDirectory, this.wakeSound),
+    });
+  }
+
+  // Play a random exit sound
+  playExitSound() {
+    let shutdownSound;
+    let p = Math.floor(Math.random() * 10);
+
+    switch(p){
+      case 1:
+      case 2:
+        shutdownSound = "logoff.wav";
+        break;
+      case 3:
+      case 4:
+	shutdownSound = "toodleoo.wav";
+    	break;
+      case 5:
+      case 6:
+ 	shutdownSound = "goodbye.wav";
+	break;
+      default:
+    	shutdownSound = "shutdown.wav";
+    }
+
+    player.play({
+      path: path.join(this.soundDirectory, shutdownSound),
     });
   }
 

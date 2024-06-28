@@ -8,6 +8,7 @@ export default class FootballCheck {
   }
 
   async checkFootball() {
+
     try {
       const data = await ical.async.fromURL(this.url);
 

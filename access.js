@@ -7,48 +7,52 @@
  * Written by Conor, 2022. License in package.json.
  */
 
-import fs from "fs";
-import config from "config";
 import { Gpio } from "onoff";
 import { parse } from "csv-parse";
 import axios from "axios";
-import ical from "node-ical";
+import config from "config";
+import fs from "fs";
 
-import Wiegand from "./src/wiegand.js";
-import TimedOutput from "./src/timed_output.js";
-import Telegram from "./src/telegram.js";
-import Logger from "./src/logger.js";
+import Audio from "./src/audio.js";
+import FootballCheck from "./src/football_check.js";
 import Lcd from "./src/lcd.js";
-
-/**
- * System variables
- */
-let errors = {
-  errorLog: { status: false, notified: false },
-  memberList: { status: false, notified: false },
-};
+import Logger from "./src/logger.js";
+import Telegram from "./src/telegram.js";
+import TimedOutput from "./src/timed_output.js";
+import Wiegand from "./src/wiegand.js";
 
 /**
  * Pin Numbers!
- * Specify here where each thing is connected to.
- * IMPORTANT - NOTE whether it's a board pin number, or BCM pin number. lol.
+ * Specify here where each thing is connected to - uses BCM mode
  */
 
-// Fob Reader - the Wiegand library uses *** BCM mode ***
+// Fob Reader - the Wiegand library
 const p_rfid_d0 = 4;
 const p_rfid_d1 = 17;
 const p_rfid_beep = 24; // This beeper is loud but can't be used in short bursts
 const p_rfid_led = 25; // Inbuilt fob reader LED. Red when low, Green when high.
 
-// Auxiliary - uses *** BCM mode ***
+// Auxiliary
 const p_relay_1 = 8; // To gate lock (short release)
 const p_relay_2 = 9; // To strike lock (long release) (for future)
 const p_input_doorbell = 23;
 const p_input_rex = 27; // Request To Exit
 
-// Led status - uses *** BCM mode ***
+// Led status
 const p_led_error = 5;
 const p_led_run = 7;
+
+/**
+ * System variables
+ */
+const SECOND = 1000;
+const MINUTE = SECOND * 60;
+const HOUR = MINUTE * 60;
+
+let errors = {
+  errorLog: { status: false, notified: false },
+  memberList: { status: false, notified: false },
+};
 
 /**
  * Set up audit log
@@ -119,9 +123,12 @@ const strike = new TimedOutput({
 const fobReader = new Wiegand({
   pinD0: p_rfid_d0,
   pinD1: p_rfid_d1,
-  validateCallback: (code, isKeycode) => validate({ entryCode: code, isKeycode}),
+  validateCallback: (code, isKeycode) =>
+    validate({ entryCode: code, isKeycode }),
 });
 const lcdDisplay = new Lcd();
+const footballCheck = new FootballCheck();
+const audio = new Audio();
 
 /**
  * Watch inputs
@@ -142,9 +149,11 @@ const grantEntry = () => {
   lock.trigger();
   strike.trigger();
   led_outside.trigger({ duration: 5000, blocking: true });
-  setTimeout(() => buzzer_outside.trigger({ duration: 50 }), 100);
-  setTimeout(() => buzzer_outside.trigger({ duration: 50 }), 200);
-  setTimeout(() => buzzer_outside.trigger({ duration: 50 }), 300);
+
+  // Three pips to acknowledge correct code
+  setTimeout(() => buzzer_outside.trigger({ duration: 20 }), SECOND);
+  setTimeout(() => buzzer_outside.trigger({ duration: 20 }), SECOND * 2);
+  setTimeout(() => buzzer_outside.trigger({ duration: 20 }), SECOND * 3);
 };
 
 const denyEntry = () => {
@@ -196,7 +205,10 @@ const entryCodeExistsInMemberlist = ({ entryCode, isKeycode = false }) => {
           }
 
           if (!isKeycode && !memberCodeId.startsWith("ff")) {
-            if (memberCodeId.slice(0, 6) == entryCode.slice(0, 6)) {
+            if (
+              memberCodeId.slice(0, 6).toLowerCase() ==
+              entryCode.slice(0, 6).toLowerCase()
+            ) {
               resolve({
                 memberCodeId,
                 announceName,
@@ -209,12 +221,11 @@ const entryCodeExistsInMemberlist = ({ entryCode, isKeycode = false }) => {
         // No records were found
         reject("no record found");
 
-	lcdDisplay.showMessage({
-		line1: 'Unknown fob!',
-		line2: entryCode,
-		duration: 20000
-	});
-
+        lcdDisplay.showMessage({
+          line1: "Unknown fob!",
+          line2: entryCode,
+          duration: 20000,
+        });
       });
     });
   });
@@ -247,27 +258,30 @@ const validate = ({ entryCode, isKeycode }) => {
       logger.info({
         action: "ENTRY",
         message: `Valid entry code from ${entryDevice}, unlocking door`,
-        input: memberRecord.memberId || memberRecord.memberCodeId,
+        input: memberRecord.memberCodeId,
+        memberID: memberRecord.memberId,
       });
       grantEntry();
 
       lcdDisplay.welcomeMember(memberRecord.announceName);
+      audio.playEntrySound();
 
+      // Folk were told they could use anon instead of nothing back when the field was mandatory
       const anonymous = ["anon", "Anon", "anonymous", "Anonymous"];
       if (
         !!memberRecord.announceName &&
         anonymous.indexOf(memberRecord.announceName) == -1
       ) {
         telegram.announceEntry(memberRecord.announceName);
+        
+        // Play custom sound if member ID is implemented
+        if (memberRecord.memberId) {
+          setTimeout(
+            () => audio.playCustomSound(`${memberRecord.memberId}.wav`),
+            SECOND * 2
+          );
+        }
       }
-
-      membershipSystem
-        .post("acs/activity", {
-          tagId: memberRecord.memberCodeId,
-          device: entryDevice,
-          occurredAt: "0",
-        })
-        .catch((error) => {});
     })
     .catch((e) => {
       console.log("Entry denied or error granting entry", e);
@@ -291,6 +305,7 @@ const ringDoorbell = () => {
 const requestToExit = () => {
   logger.info({ action: "REX", message: "A request to exit was made" });
   grantEntry();
+  audio.playExitSound();
   lcdDisplay.showMessage({
     line1: "Goodbye!",
     line2: "See you soon",
@@ -353,7 +368,7 @@ const checkForErrors = () => {
       const { mtime } = stats;
 
       const memberListAge = Math.abs(new Date() - mtime);
-      const diffHours = Math.ceil(memberListAge / (1000 * 60 * 60));
+      const diffHours = Math.ceil(memberListAge / HOUR);
 
       monitorError({
         type: "memberList",
@@ -391,7 +406,7 @@ setInterval(() => {
 
   // Blink Status LED
   gpio_led_run.write(seconds % 2);
-  if (millis < 50 && seconds % 10 ==0) led_outside.trigger({duration: 20});
+  if (millis < 50 && seconds % 10 == 0) led_outside.trigger({ duration: 20 });
   // Blink error LED
   const activeErrors = errorStatus();
   if (activeErrors > -1) {
@@ -412,7 +427,7 @@ setInterval(() => {
  */
 setInterval(() => {
   checkForErrors();
-}, 1000 * 60 * 5);
+}, MINUTE * 5);
 
 /**
  * Sent heartbeat to the membership system every few minutes
@@ -420,45 +435,32 @@ setInterval(() => {
  */
 setInterval(() => {
   sendHeartbeat();
-}, 1000 * 60 * 5);
+}, MINUTE * 5);
 
-
-// This is a bodge!!!!! Not committed to GH yet
-const nastyFootballAlertHack = async () => {
-  const data = await ical.async.fromURL(
-    "https://ics.fixtur.es/v2/home/manchester-city.ics"
-  );
-  try {
-    for (let k in data) {
-      if (data.hasOwnProperty(k)) {
-        const event = data[k];
-        if (event.type == "VEVENT") {
-          if (new Date(event.start).setHours(0,0,0,0) == new Date().setHours(0,0,0,0)) {
-            const e = {
-              date: new Date(event.start).toLocaleDateString("en-GB"),
-              start: new Date(event.start).toLocaleTimeString(),
-              end: new Date(event.end).toLocaleTimeString(),
-              title: event.summary
-            };
-
-            if(new Date() < new Date(event.end)){
-              telegram.announceMessage(`<b>Football Notice!</b>\nA football match is on today at the Etihad! \n\n<b>${e.title}</b> \n\n<b>Date:</b> ${e.date} \n<b>Start time:</b> ${e.start} \n<b>End time:</b> ${e.end} \n\n<i>Roads and public transport will be extremely busy before and after the event, and on street parking will be extremely limited.</i>`)
-            }
-          }
-        }
-      }
-    }
-  } catch (e) {
-    console.log(e);
-  }
+// Shout out if there's a football event on today
+const checkFootball = async () => {
+  const event = footballCheck.checkFootball();
+  //if (event) {
+  //  telegram.announceFootballEvent(event);
+  //}
 };
 
-setInterval(nastyFootballAlertHack, 1000 * 60 * 60 * 8)
-await nastyFootballAlertHack()
+// We need to keep the bluetooth speaker awake, so we play a tiny sound occasionally
+const wakeSpeaker = () => {
+  //audio.playWakeSound();
+};
 
+// Just an easter egg
+const playPigeon = () => {
+  audio.playCustomSound("pigeon.wav");
+};
 
 /**
  * Startup activities
  */
+setInterval(wakeSpeaker, MINUTE * 10);
+setInterval(playPigeon, MINUTE * 60);
+setInterval(checkFootball, HOUR * 8);
+playPigeon();
 checkForErrors();
 sendHeartbeat();

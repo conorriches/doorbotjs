@@ -17,6 +17,7 @@
     "node-fetch": "^3.3.0",
     "node-ical": "^0.16.0",
     "node-telegram-bot-api": "^0.60.0",
+    "node-wav-player": "^0.2.0",
     "onoff": "^6.0.3",
     "pm2": "^5.2.2",
     "raspberrypi-liquid-crystal": "^1.18.0",

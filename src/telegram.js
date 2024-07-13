@@ -17,18 +17,20 @@ export default class Telegram {
   }
 
   announceStartup() {
-    this.client.post("/sendMessage", {
-      chat_id: this.chatId,
-      text: "🤖 The doorbot was started!",
-    }).catch(()=>{});
+    this.client
+      .post("/sendMessage", {
+        chat_id: this.chatId,
+        text: "🤖 The doorbot was started!",
+      })
+      .catch(() => {});
   }
 
   announceMessage(text) {
     this.client.post("/sendMessage", {
       chat_id: this.chatId,
-      parse_mode: 'HTML',
-      text
-    })
+      parse_mode: "HTML",
+      text,
+    });
   }
 
   /**
@@ -46,11 +48,13 @@ export default class Telegram {
       const newString = `${this.lastMessageString} (${time})`;
       this.lastMessageString = newString;
 
-      this.client.post("/editMessageText", {
-        chat_id: this.chatId,
-        message_id: this.lastMessageId,
-        text: newString,
-      }).catch(()=>{});
+      this.client
+        .post("/editMessageText", {
+          chat_id: this.chatId,
+          message_id: this.lastMessageId,
+          text: newString,
+        })
+        .catch(() => {});
     } else {
       const greeting = `🔑 ${decodeURIComponent(user)} (${time})`;
 
@@ -64,7 +68,8 @@ export default class Telegram {
           this.lastMessageId = msg.data.result.message_id;
           this.lastMessageString = greeting;
           this.lastEnteredName = user;
-        }).catch(()=>{});
+        })
+        .catch(() => {});
     }
   }
 
@@ -85,5 +90,11 @@ export default class Telegram {
       chat_id: this.chatId,
       text: `🛑 ${typeStr}An error was encountered with the entry system.${detailsStr}`,
     });
+  }
+
+  announceFootballEvent(event) {
+    this.announceMessage(
+      `<b>Football Notice!</b>\nA football match is on today at the Etihad! \n\n<b>${event.title}</b> \n\n<b>Date:</b> ${event.date} \n<b>Start time:</b> ${event.start} \n<b>End time:</b> ${event.end} \n\n<i>Roads and public transport will be extremely busy before and after the event, and on street parking will be extremely limited.</i>`
+    );
   }
 }

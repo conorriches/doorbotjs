@@ -14,7 +14,7 @@ const key = config.get("members.querykey");
  * This prevents a 404/500 page replacing the memberlist
  */
 axios
-  .get(`https://members.hacman.org.uk/query2.php?key=${key}`, {
+  .get(`https://members.hacman.org.uk/api/keyfobs/csv?api_token=${key}`, {
     responseType: "stream",
   })
   .then((response) => {
@@ -61,7 +61,7 @@ const verifyFile = () => {
       if (err) {
         logger.info({
           action: "PARSE",
-          message: "Error parsing new members file",
+          message: `Error parsing new members file: ${err}`,
         });
         return;
       }

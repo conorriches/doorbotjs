@@ -172,7 +172,7 @@ const denyEntry = () => {
  */
 const entryCodeExistsInMemberlist = ({ entryCode, isKeycode = false }) => {
   return new Promise((resolve, reject) => {
-    fs.readFile("members.csv", "utf8", (err, data) => {
+    fs.readFile("userlists/members.csv", "utf8", (err, data) => {
       if (err) {
         logger.info({
           action: "CHECKMEMBERS",
@@ -363,7 +363,7 @@ const checkForErrors = () => {
   });
 
   // Raise error if member list is over 6 hours old
-  fs.stat("members.csv", (err, stats) => {
+  fs.stat("userlists/members.csv", (err, stats) => {
     if (!err) {
       const { mtime } = stats;
 

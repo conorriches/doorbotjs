@@ -14,5 +14,20 @@
   "members": {
     "querykey": "",
     "apikey": ""
+  },
+  "server": {
+    "userlists": [
+      { "id": "entry", "userlist": "members.csv" },
+      { "id": "woodwork", "userlist": "woodwork.csv" },
+      { "id": "cnc", "userlist": "cnc.csv" },
+      { "id": "laser", "userlist": "laser.csv" }
+    ],
+    "entities": [
+      {
+        "id": "front_door",
+        "userlist": "entry",
+        "apiKey": ""
+      }
+    ]
   }
 }

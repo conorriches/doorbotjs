@@ -1,5 +1,13 @@
 # DoorbotJS - a simple and modular open source access control system
 
+There are three main modes of operation:
+* Standalone
+  * Used as a single box to manage entry for a door, runs sever and client locally
+* Server
+  * Exposes an API which Clients can query 
+* Client
+  * Queries a Server when presented with an entry code
+
 
 ## Features
 ### Inputs

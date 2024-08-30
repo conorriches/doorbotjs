@@ -6,7 +6,7 @@ import axios from "axios";
 
 const logger = new Logger({process: "updatememberlist"});
 const tempFile = "temp/members.csv";
-const membersFile = "members.csv";
+const membersFile = "userlists/members.csv";
 const key = config.get("members.querykey");
 
 /**

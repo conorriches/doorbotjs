@@ -14,6 +14,7 @@ export default class Telegram {
     this.lastEnteredName = "";
     this.lastMessageString = "";
     this.lastMessageId = 0;
+    this.lastEnteredDate = new Date();
   }
 
   announceStartup() {
@@ -22,7 +23,7 @@ export default class Telegram {
         chat_id: this.chatId,
         text: "🤖 The doorbot was started!",
       })
-      .catch(() => {});
+      .catch(() => { });
   }
 
   announceMessage(text) {
@@ -44,7 +45,12 @@ export default class Telegram {
       ("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2);
 
     // Edit message if the same person has re-entered
-    if (user == this.lastEnteredName && this.lastMessageId) {
+    // Do not edit if it's a new day to prevent confusing timelines
+    const sameUser = user == this.lastEnteredName;
+    const sameDay =  this.lastEnteredDate?.getDay() === new Date().getDay();
+
+    const editMessage = this.lastMessageId && sameUser && sameDay
+    if (editMessage) {
       const newString = `${this.lastMessageString} (${time})`;
       this.lastMessageString = newString;
 
@@ -54,7 +60,7 @@ export default class Telegram {
           message_id: this.lastMessageId,
           text: newString,
         })
-        .catch(() => {});
+        .catch(() => { });
     } else {
       const greeting = `🔑 ${decodeURIComponent(user)} (${time})`;
 
@@ -69,7 +75,7 @@ export default class Telegram {
           this.lastMessageString = greeting;
           this.lastEnteredName = user;
         })
-        .catch(() => {});
+        .catch(() => { });
     }
   }
 

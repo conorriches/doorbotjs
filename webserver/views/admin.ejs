@@ -1,0 +1,55 @@
+<h3>System status <small>(reload to get fresh status)</small></h3>
+<% if(connected) { %>
+<div class="statuses">
+  <div class="status">
+    <div class="status__label">
+      Power is ON
+      <small>If you're reading this, the power is on</small>
+    </div>
+    <div class="status__indicator status__indicator--success"></div>
+  </div>
+  <div class="status">
+    <div class="status__label">
+      System is<% if(!accessRunning) { %> NOT<% } %> Functioning
+      <small>Has the `access` process been up for more than 10s</small>
+    </div>
+    <div
+      class="status__indicator <% if(accessRunning) { %>status__indicator--success status__indicator--blinking <% } %>"
+    ></div>
+  </div>
+  <div class="status">
+    <div class="status__label">
+      Error
+      <small>Content written to logs or stale memberlist</small>
+    </div>
+    <div class="status__indicator status__indicator--error-shadow"></div>
+  </div>
+</div>
+<% } else { %>
+<div class="alert alert-danger">
+  <h3>Cound not connect to PM2</h3>
+</div>
+<% } %>
+
+<h3>Admin functions</h3>
+<div class="alert alert-danger">
+  <h3>Please authenticate yourself</h3>
+  <img src="/images/nikki-grahame.gif" />
+  <br />
+  <br />
+</div>
+
+<form action="/sounds" method="post" enctype="multipart/form-data">
+  <h3>Identify yourself by entering your passphrase</h3>
+
+  <label>
+    Fob ID
+    <input type="text" name="fobid" id="fobid" />
+  </label>
+
+  <input type="submit" value="Authenticate" />
+</form>
+
+<h3>View logs, verify memberlists, API status</h3>
+<h3>System status</h3>
+<h3>Emergency actions</h3>

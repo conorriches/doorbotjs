@@ -280,7 +280,7 @@ const validate = ({ entryCode, isKeycode }) => {
         if (memberRecord.memberId) {
           setTimeout(
             () => audio.playCustomSound(`${memberRecord.memberId}.wav`),
-            SECOND * 2,
+            SECOND * 2
           );
         }
       }
@@ -289,7 +289,7 @@ const validate = ({ entryCode, isKeycode }) => {
       console.log("Entry denied or error granting entry", e);
 
       // check emergency code if it's a code that's been entered
-      if (isKeycode && entryCode.slice(0,4) === "0000") {
+      if (isKeycode && entryCode.slice(0, 4) === "0000") {
         emergencyCode.validate(entryCode.slice(4)).then(() => {
           logger.info({
             action: "EMERGENCY_ENTRY",
@@ -297,6 +297,7 @@ const validate = ({ entryCode, isKeycode }) => {
           });
           grantEntry();
 
+          telegram.announceEmergencyEntry();
           lcdDisplay.welcomeMember("EMERGENCY");
         });
       }

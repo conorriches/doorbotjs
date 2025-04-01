@@ -59,18 +59,18 @@ export default class EmergencyCode {
 
             fs.writeFile(
               "emergency_codes.csv",
-              updatedRecords.join("\n"),
+              updatedRecords.join("\n").concat("\n"),
               "utf8",
               function (err) {
                 if (err) {
                   console.log(
-                    "Some error occurred - file either not saved or corrupted file saved.",
+                    "Some error occurred - file either not saved or corrupted file saved."
                   );
                   return;
                 } else {
                   console.log("It's saved!");
                 }
-              },
+              }
             );
           } else {
             // No records were found

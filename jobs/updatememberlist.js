@@ -1,10 +1,10 @@
 import fs from "fs";
 import config from "config";
-import Logger from "./src/logger.js";
+import Logger from "../src/logger.js";
 import { parse } from "csv-parse";
 import axios from "axios";
 
-const logger = new Logger({process: "updatememberlist"});
+const logger = new Logger({ process: "updatememberlist" });
 const tempFile = "temp/members.csv";
 const membersFile = "members.csv";
 const key = config.get("members.querykey");
@@ -23,12 +23,13 @@ axios
         action: "DOWNLOAD",
         message: "Memberlist response wasn't a 200",
       });
-      throw "BadStatus"
+      throw "BadStatus";
     }
-    response.data.pipe(fs.createWriteStream(tempFile)).on('close', () => {
+    response.data.pipe(fs.createWriteStream(tempFile)).on("close", () => {
       verifyFile();
     });
-  }).catch(e => {
+  })
+  .catch((e) => {
     // If we can't get a new memberlist, oh well.
     // access.js will report if the memberlist goes too stale.
     console.log(e);

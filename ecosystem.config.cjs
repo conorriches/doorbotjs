@@ -17,7 +17,7 @@ module.exports = {
     },
     {
       name: "announceEvents",
-      script: "./announceEvents.js",
+      script: "./jobs/announceEvents.js",
       error_file: "logs/error/announceEvents.log",
       cron_restart: "0 6 * * *",
       autorestart: false,

@@ -3,7 +3,7 @@
 import config from "config";
 import ical from "node-ical";
 import { JSDOM } from "jsdom";
-import Telegram from "./src/telegram.js";
+import Telegram from "../src/telegram.js";
 
 const COOPLIVE = "CO-OP Live";
 const ETIHAD = "Etihad Campus";
@@ -120,7 +120,7 @@ const checkEvents = async () => {
   });
 
   const coopLiveEventsToday = await getCoopLiveEvents({
-    date: new Date("2025-04-03"),
+    date: new Date(),
   });
 
   if (icalEventsToday) events = events.concat(icalEventsToday);

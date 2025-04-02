@@ -20,6 +20,7 @@ import Logger from "./src/logger.js";
 import Telegram from "./src/telegram.js";
 import TimedOutput from "./src/timed_output.js";
 import Wiegand from "./src/wiegand.js";
+import EmergencyCode from "./src/emergency_code.js";
 
 /**
  * Pin Numbers!
@@ -126,6 +127,7 @@ const fobReader = new Wiegand({
   validateCallback: (code, isKeycode) =>
     validate({ entryCode: code, isKeycode }),
 });
+const emergencyCode = new EmergencyCode({ logger });
 const lcdDisplay = new Lcd();
 const footballCheck = new FootballCheck();
 const audio = new Audio();
@@ -220,6 +222,21 @@ const validate = ({ entryCode, isKeycode }) => {
       });
 
       console.log("Entry denied or error granting entry", e);
+
+      // check emergency code if it's a code that's been entered
+      if (isKeycode && entryCode.slice(0, 4) === "0000") {
+        emergencyCode.validate(entryCode.slice(4)).then(() => {
+          logger.info({
+            action: "EMERGENCY_ENTRY",
+            message: `Emergency entry code from ${entryDevice}, unlocking door`,
+          });
+          grantEntry();
+
+          telegram.announceEmergencyEntry();
+          lcdDisplay.welcomeMember("EMERGENCY");
+        });
+      }
+
       denyEntry();
     });
 };

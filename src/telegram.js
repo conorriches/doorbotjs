@@ -34,6 +34,14 @@ export default class Telegram {
     });
   }
 
+  announceEmergencyEntry() {
+    this.client.post("/sendMessage", {
+      chat_id: this.chatId,
+      parse_mode: "HTML",
+      text: "🚨 Emergency code used",
+    });
+  }
+
   /**
    * Announces the entry of a user. If the user was the same as the user in the last message,
    * it'll update the previous message rather than send another one. This reduces notifications.

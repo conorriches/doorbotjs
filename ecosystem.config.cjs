@@ -10,7 +10,7 @@ module.exports = {
       name: "updatememberlist",
       script: "./jobs/updatememberlist.js",
       error_file: "logs/error/updatememberlist.log",
-      cron_restart: "*/15 * * * *",
+      cron_restart: "*/5 * * * *",
       autorestart: false,
       instances: 1,
       instance_var: "INSTANCE_ID",

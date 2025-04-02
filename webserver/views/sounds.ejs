@@ -1,0 +1,37 @@
+<h2>Upload a sound that will play whenever you scan in</h2>
+
+<p>
+  To ensure people's ears don't bleed out, please ensure your audio meets this
+  criteria:
+</p>
+<ul>
+  <li>The audio should not be more than ten seconds</li>
+  <li>The audio must not alarm peope, e.g. no screams, sirens, bangs...</li>
+  <li>The file should not be larger than 2MB</li>
+  <li>Obligatory copyright warning so we are covered</li>
+</ul>
+
+<form action="/sounds" method="post" enctype="multipart/form-data">
+  <h3>Identify yourself by entering your fob ID OR keycode</h3>
+  <div class="splitForm">
+    <label>
+      Fob ID
+      <input type="text" name="fobid" id="fobid" />
+    </label>
+
+    <label>
+      Keycode
+      <input type="text" name="keycode" />
+    </label>
+  </div>
+
+  <h3>Select what WAV file to play when you enter</h3>
+  <div class="splitForm">
+    <label>
+      Upload your entry WAV file
+      <input type="file" name="sound" value="" accept="audio/wav" />
+    </label>
+  </div>
+
+  <input type="submit" value="Set custom sound" />
+</form>

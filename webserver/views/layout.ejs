@@ -1,0 +1,43 @@
+<html>
+  <head>
+    <title>DoorbotJS webview</title>
+    <link rel="stylesheet" type="text/css" href="css/styles.css" />
+    <meta
+      name="viewport"
+      content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+  </head>
+  <body>
+    <header>
+      <h1>DoorbotJS Webview</h1>
+    </header>
+    <menu>
+      <ul>
+        <li><a href="/" class="<%= menu === 'home' && 'active' %>">home</a></li>
+        <li>
+          <a href="/admin" class="<%= menu === 'admin' && 'active' %>">admin</a>
+        </li>
+        <li>
+          <a href="/sounds" class="<%= menu === 'sounds' && 'active' %>"
+            >set your entry sound</a
+          >
+        </li>
+      </ul>
+    </menu>
+    <main>
+      <div class="alerts">
+        <% for(let msg of getFlashMessages('success')) { %>
+        <div class="alert alert-success">
+          <h3><%= msg %></h3>
+        </div>
+        <% } %> <% for(let msg of getFlashMessages('error')) { %>
+        <div class="alert alert-danger">
+          <h3><%= msg %></h3>
+        </div>
+        <% } %>
+      </div>
+
+      <%- body %>
+    </main>
+  </body>
+</html>

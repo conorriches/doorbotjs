@@ -8,9 +8,9 @@ module.exports = {
     },
     {
       name: "updatememberlist",
-      script: "./updatememberlist.js",
+      script: "./jobs/updatememberlist.js",
       error_file: "logs/error/updatememberlist.log",
-      cron_restart: "*/15 * * * *",
+      cron_restart: "*/5 * * * *",
       autorestart: false,
       instances: 1,
       instance_var: "INSTANCE_ID",
@@ -23,6 +23,11 @@ module.exports = {
       autorestart: false,
       instances: 1,
       instance_var: "INSTANCE_ID",
+    },
+    {
+      name: "webview",
+       script: "./webserver/index.js",
+      error_file: "logs/error/webview.log",
     },
   ],
 };

@@ -8,17 +8,18 @@
  */
 
 import { Gpio } from "onoff";
-import { parse } from "csv-parse";
 import axios from "axios";
 import config from "config";
 import fs from "fs";
 
+import { entryCodeExistsInMemberlist } from "./helpers/memberList.js";
 import Audio from "./src/audio.js";
 import Lcd from "./src/lcd.js";
 import Logger from "./src/logger.js";
 import Telegram from "./src/telegram.js";
 import TimedOutput from "./src/timed_output.js";
 import Wiegand from "./src/wiegand.js";
+import EmergencyCode from "./src/emergency_code.js";
 
 /**
  * Pin Numbers!
@@ -125,6 +126,7 @@ const fobReader = new Wiegand({
   validateCallback: (code, isKeycode) =>
     validate({ entryCode: code, isKeycode }),
 });
+const emergencyCode = new EmergencyCode({ logger });
 const lcdDisplay = new Lcd();
 const audio = new Audio();
 
@@ -156,77 +158,6 @@ const grantEntry = () => {
 
 const denyEntry = () => {
   buzzer_outside.trigger({ duration: 5000, blocking: true });
-};
-
-/**
- * Checks if a given entrycode exists in members.csv
- * accommodates keycodes and fobcodes
- *
- * returns false if there's no match
- * returns an object if there is
- *
- * @param {string} entryCode The entrycode to validate
- * @param {boolean} isKeycode Whether it's a keycode
- */
-const entryCodeExistsInMemberlist = ({ entryCode, isKeycode = false }) => {
-  return new Promise((resolve, reject) => {
-    fs.readFile("members.csv", "utf8", (err, data) => {
-      if (err) {
-        logger.info({
-          action: "CHECKMEMBERS",
-          message: "Couldn't read members file",
-        });
-        reject();
-      }
-
-      parse(data, function (err, records) {
-        if (err) {
-          logger.info({
-            action: "CHECKMEMBERS",
-            message: "Couldn't parse members file",
-          });
-          reject();
-        }
-
-        records.forEach((record) => {
-          // Note! memberId could be null as this may not be implemented immediately!
-          const [memberCodeId, announceName, memberId] = record;
-
-          if (isKeycode && memberCodeId.startsWith("ff")) {
-            if (memberCodeId.slice(2) === entryCode) {
-              resolve({
-                memberCodeId,
-                announceName,
-                memberId,
-              });
-            }
-          }
-
-          if (!isKeycode && !memberCodeId.startsWith("ff")) {
-            if (
-              memberCodeId.slice(0, 6).toLowerCase() ==
-              entryCode.slice(0, 6).toLowerCase()
-            ) {
-              resolve({
-                memberCodeId,
-                announceName,
-                memberId,
-              });
-            }
-          }
-        });
-
-        // No records were found
-        reject("no record found");
-
-        lcdDisplay.showMessage({
-          line1: "Unknown fob!",
-          line2: entryCode,
-          duration: 20000,
-        });
-      });
-    });
-  });
 };
 
 /**
@@ -282,7 +213,28 @@ const validate = ({ entryCode, isKeycode }) => {
       }
     })
     .catch((e) => {
+      lcdDisplay.showMessage({
+        line1: "Unknown fob!",
+        line2: entryCode,
+        duration: 20000,
+      });
+
       console.log("Entry denied or error granting entry", e);
+
+      // check emergency code if it's a code that's been entered
+      if (isKeycode && entryCode.slice(0, 4) === "0000") {
+        emergencyCode.validate(entryCode.slice(4)).then(() => {
+          logger.info({
+            action: "EMERGENCY_ENTRY",
+            message: `Emergency entry code from ${entryDevice}, unlocking door`,
+          });
+          grantEntry();
+
+          telegram.announceEmergencyEntry();
+          lcdDisplay.welcomeMember("EMERGENCY");
+        });
+      }
+
       denyEntry();
     });
 };

@@ -26,7 +26,7 @@ module.exports = {
     },
     {
       name: "webview",
-       script: "./webserver/index.js",
+      script: "./webserver/index.js",
       error_file: "logs/error/webview.log",
     },
   ],

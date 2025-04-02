@@ -15,5 +15,10 @@ module.exports = {
       instances: 1,
       instance_var: "INSTANCE_ID",
     },
+    {
+      name: "webview",
+      script: "./webserver/index.js",
+      error_file: "logs/error/webview.log",
+    },
   ],
 };

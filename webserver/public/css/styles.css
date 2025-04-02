@@ -92,6 +92,9 @@ form {
   border-color: #afa;
   background-color: #efe;
 }
+.alert > * {
+  max-width: 100%;
+}
 
 .statuses {
   display: flex;
@@ -127,8 +130,8 @@ form {
 
 .status__indicator {
   background: #262;
-  width: 2em;
-  height: 2em;
+  min-width: 2em;
+  max-height: 2em;
   border-radius: 1em;
 }
 

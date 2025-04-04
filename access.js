@@ -14,7 +14,6 @@ import fs from "fs";
 
 import { entryCodeExistsInMemberlist } from "./helpers/memberList.js";
 import Audio from "./src/audio.js";
-import FootballCheck from "./src/football_check.js";
 import Lcd from "./src/lcd.js";
 import Logger from "./src/logger.js";
 import Telegram from "./src/telegram.js";
@@ -129,7 +128,6 @@ const fobReader = new Wiegand({
 });
 const emergencyCode = new EmergencyCode({ logger });
 const lcdDisplay = new Lcd();
-const footballCheck = new FootballCheck();
 const audio = new Audio();
 
 /**
@@ -335,7 +333,7 @@ const checkForErrors = () => {
  * Lets the membership system know we're alive
  */
 const sendHeartbeat = () => {
-  membershipSystem.post("acs/node/heartbeat").catch((error) => {});
+  membershipSystem.post("acs/node/heartbeat").catch((error) => { });
 };
 
 /**
@@ -389,14 +387,6 @@ setInterval(() => {
   sendHeartbeat();
 }, MINUTE * 5);
 
-// Shout out if there's a football event on today
-const checkFootball = async () => {
-  const event = footballCheck.checkFootball();
-  if (event) {
-    telegram.announceFootballEvent(event);
-  }
-};
-
 // We need to keep the bluetooth speaker awake, so we play a tiny sound occasionally
 const wakeSpeaker = () => {
   //audio.playWakeSound();
@@ -412,7 +402,6 @@ const playPigeon = () => {
  */
 setInterval(wakeSpeaker, MINUTE * 10);
 setInterval(playPigeon, MINUTE * 60);
-setInterval(checkFootball, HOUR * 8);
 playPigeon();
 checkForErrors();
 sendHeartbeat();

@@ -14,6 +14,7 @@ export default class Wiegand {
     this.fobReader.on("reader", (idDec, idRFID, idHex) => {
       validateCallback(this.convert(idDec), false, this.silentEntry);
       this.code = [];
+      this.silentEntry = false;
     });
 
     this.fobReader.on("keypad", (key) => {

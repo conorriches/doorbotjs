@@ -16,6 +16,15 @@ module.exports = {
       instance_var: "INSTANCE_ID",
     },
     {
+      name: "announceEvents",
+      script: "./jobs/announceEvents.js",
+      error_file: "logs/error/announceEvents.log",
+      cron_restart: "0 6,16 * * *",
+      autorestart: false,
+      instances: 1,
+      instance_var: "INSTANCE_ID",
+    },
+    {
       name: "webview",
       script: "./webserver/index.js",
       error_file: "logs/error/webview.log",

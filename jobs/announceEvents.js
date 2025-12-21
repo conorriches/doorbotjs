@@ -23,9 +23,11 @@ const getCoopLiveEvents = async ({ date }) => {
 
     document.querySelectorAll(".listItemWrapper").forEach((elem) => {
       // Scrape the page - this may need updating as their site updates!
-      const eventDateStr = elem.querySelector(".start").innerHTML.trim();
-      const eventTimeStr = elem.querySelector(".time").innerHTML.trim();
-      const eventTitle = elem.querySelector(".title").innerHTML.trim();
+      const eventDateStr = elem.querySelector(".start")?.innerHTML.trim();
+      const eventTimeStr = elem.querySelector(".time")?.innerHTML.trim();
+      const eventTitle = elem.querySelector(".title")?.innerHTML.trim();
+
+      if (!eventDateStr || !eventTimeStr || !eventTitle) return;
 
       const eventDateTime = new Date(`${eventDateStr} ${eventTimeStr}`);
       const eventRefDate = new Date(eventDateTime).setHours(0, 0, 0, 0);

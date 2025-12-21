@@ -9,23 +9,28 @@ export default class Wiegand {
     this.code = [];
     this.lastUsed = 0;
     this.timeout = 30000;
+    this.silentEntry = false;
 
     this.fobReader.on("reader", (idDec, idRFID, idHex) => {
-      validateCallback(this.convert(idDec), false);
+      validateCallback(this.convert(idDec), false, this.silentEntry);
       this.code = [];
     });
 
     this.fobReader.on("keypad", (key) => {
       this.lastUsed = Date.now();
 
-      switch(key){
+      switch (key) {
         case 10: // Clear
+          if (!this.code.length) {
+            this.silentEntry = true;
+          }
           this.code = [];
           break;
         case 11: // Enter
-          validateCallback(this.code.join(""),true);
+          validateCallback(this.code.join(""), true, this.silentEntry);
           this.code = [];
-	  break;
+          this.silentEntry = false;
+          break;
         default:
           this.code.push(key);
       }
@@ -39,16 +44,17 @@ export default class Wiegand {
       if (Date.now() - this.lastUsed > this.timeout) {
         this.lastUsed = 0;
         this.code = [];
+        this.silentEntry = false;
       }
     }
   }
 
-  convert(decimal){
+  convert(decimal) {
     let hex = decimal.toString(16);
     hex = hex.replace(/^(.(..)*)$/, "0$1");
     let arr = hex.match(/../g);
     arr.reverse();
     console.log("keyfob arr", arr);
-    return arr.join("")
+    return arr.join("");
   }
 }

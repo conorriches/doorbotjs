@@ -124,8 +124,8 @@ const strike = new TimedOutput({
 const fobReader = new Wiegand({
   pinD0: p_rfid_d0,
   pinD1: p_rfid_d1,
-  validateCallback: (code, isKeycode) =>
-    validate({ entryCode: code, isKeycode }),
+  validateCallback: (code, isKeycode, isSilent) =>
+    validate({ entryCode: code, isKeycode, isSilent }),
 });
 const emergencyCode = new EmergencyCode({ logger });
 const lcdDisplay = new Lcd();
@@ -167,7 +167,7 @@ const denyEntry = () => {
  * Grants or denies entry accordingly
  * @param {string} entryCode the code to validate
  */
-const validate = ({ entryCode, isKeycode }) => {
+const validate = ({ entryCode, isKeycode, isSilent = false }) => {
   if (entryCode.length < 6) {
     denyEntry();
     return;
@@ -203,10 +203,10 @@ const validate = ({ entryCode, isKeycode }) => {
         !!memberRecord.announceName &&
         anonymous.indexOf(memberRecord.announceName) == -1
       ) {
-        telegram.announceEntry(memberRecord.announceName);
+        if (!isSilent) telegram.announceEntry(memberRecord.announceName);
 
         // Play custom sound if member ID is implemented
-        if (memberRecord.memberId) {
+        if (memberRecord.memberId && !isSilent) {
           setTimeout(
             () => audio.playCustomSound(`${memberRecord.memberId}.wav`),
             SECOND * 2

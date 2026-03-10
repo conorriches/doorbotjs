@@ -27,27 +27,20 @@ export default class FreeKiosk {
   announceEntry({ username, customSound }) {
     if (!this.myIP) return;
 
-    this.client.post("/api/rotation/stop");
+    this.client.post("/api/rotation/stop").then(() => {
+      this.client
+        .post("/api/navigate", {
+          url: `http://${this.myIP}:3000/screen/entry?u=${username}`,
+        })
+        .then(() => {
+          //TODO, get port number instead of hardcoding
+          this.client.post("/api/audio/play", {
+            url: `http://${this.myIP}:3000/screen/audio/entrance.wav`,
+          });
 
-    const entryScreenData = new FormData();
-    entryScreenData.append("url", `http://${this.myIP}:3000/screen/entry`);
-
-    this.client.post("/api/navigate", {
-      data: entryScreenData,
+          //TODO, THEN this after N seconds
+          this.client.post("/api/rotation/start");
+        });
     });
-
-    //TODO, get port number instead of hardcoding
-    const entrySoundData = new FormData();
-    entrySoundData.append(
-      "url",
-      `http://${this.myIP}:3000/screen/audio/entrance.wav`
-    );
-
-    this.client.post("/api/audio/play", {
-      data: entrySoundData,
-    });
-
-    //TODO, THEN this after N seconds
-    this.client.post("/api/rotation/start");
   }
 }

@@ -20,6 +20,7 @@ import Telegram from "./src/telegram.js";
 import TimedOutput from "./src/timed_output.js";
 import Wiegand from "./src/wiegand.js";
 import EmergencyCode from "./src/emergency_code.js";
+import FreeKiosk from "./src/freekiosk.js";
 
 /**
  * Pin Numbers!
@@ -80,7 +81,7 @@ const telegram = new Telegram({
   apiKey: config.get("telegram.apikey"),
   chatId: config.get("telegram.chatid"),
 });
-telegram.announceStartup();
+//telegram.announceStartup();
 
 /**
  * Set up API for membership system
@@ -129,6 +130,7 @@ const fobReader = new Wiegand({
 const emergencyCode = new EmergencyCode({ logger });
 const lcdDisplay = new Lcd();
 const audio = new Audio();
+const tablet = new FreeKiosk({ baseUrl: config.get("screens.tablet.baseUrl") });
 
 /**
  * Watch inputs
@@ -194,6 +196,7 @@ const validate = ({ entryCode, isKeycode, isSilent = false }) => {
 
       lcdDisplay.welcomeMember(memberRecord.announceName);
       audio.playEntrySound();
+      tablet.announceEntry({ username: memberRecord.announceName });
 
       // Folk were told they could use anon instead of nothing back when the field was mandatory
       const anonymous = ["anon", "Anon", "anonymous", "Anonymous"];
@@ -333,7 +336,7 @@ const checkForErrors = () => {
  * Lets the membership system know we're alive
  */
 const sendHeartbeat = () => {
-  membershipSystem.post("acs/node/heartbeat").catch((error) => { });
+  membershipSystem.post("acs/node/heartbeat").catch((error) => {});
 };
 
 /**

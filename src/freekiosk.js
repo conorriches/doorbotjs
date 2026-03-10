@@ -29,11 +29,22 @@ export default class FreeKiosk {
 
     this.client.post("/api/rotation/stop");
 
-    this.client.post("/api/navigate", { url: "" });
+    const entryScreenData = new FormData();
+    entryScreenData.append("url", `http://${this.myIP}:3000/screen/entry`);
+
+    this.client.post("/api/navigate", {
+      data: entryScreenData,
+    });
 
     //TODO, get port number instead of hardcoding
+    const entrySoundData = new FormData();
+    entrySoundData.append(
+      "url",
+      `http://${this.myIP}:3000/screen/audio/entrance.wav`
+    );
+
     this.client.post("/api/audio/play", {
-      url: `http://${this.myIP}:3000/screen/audio/entrance.wav`,
+      data: entrySoundData,
     });
 
     //TODO, THEN this after N seconds

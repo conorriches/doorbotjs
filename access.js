@@ -130,7 +130,7 @@ const fobReader = new Wiegand({
 const emergencyCode = new EmergencyCode({ logger });
 const lcdDisplay = new Lcd();
 const audio = new Audio();
-const tablet = new FreeKiosk({ baseUrl: config.get("screens.tablet.baseUrl") });
+const tablet = new FreeKiosk({ baseURL: config.get("screens.tablet.baseUrl") });
 
 /**
  * Watch inputs

@@ -1,7 +1,7 @@
 <html>
   <head>
     <title>DoorbotJS webview</title>
-    <link rel="stylesheet" type="text/css" href="css/styles.css" />
+    <link rel="stylesheet" type="text/css" href="/css/admin_styles.css" />
     <meta
       name="viewport"
       content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
@@ -13,12 +13,16 @@
     </header>
     <menu>
       <ul>
-        <li><a href="/" class="<%= menu === 'home' && 'active' %>">home</a></li>
         <li>
-          <a href="/admin" class="<%= menu === 'admin' && 'active' %>">admin</a>
+          <a href="/admin" class="<%= menu === 'home' && 'active' %>">home</a>
         </li>
         <li>
-          <a href="/sounds" class="<%= menu === 'sounds' && 'active' %>"
+          <a href="/admin/admin" class="<%= menu === 'admin' && 'active' %>"
+            >admin</a
+          >
+        </li>
+        <li>
+          <a href="/admin/sounds" class="<%= menu === 'sounds' && 'active' %>"
             >set your entry sound</a
           >
         </li>

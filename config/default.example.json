@@ -14,5 +14,11 @@
   "members": {
     "querykey": "",
     "apikey": ""
-  }
+  },
+  "screens": {
+    "tablet": {
+      "baseUrl": ""
+    }
+  },
+  "domain": ""
 }

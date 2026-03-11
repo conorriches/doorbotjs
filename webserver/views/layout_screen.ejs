@@ -9,9 +9,40 @@
   </head>
   <body>
     <div class="status">
-      <h1>10:25</h1>
+      <h1>
+        <span id="hours"></span>
+        <span id="separator">:</span>
+        <span id="minutes"></span>
+      </h1>
+
+      <h1>Hackspace Manchester</h1>
     </div>
 
     <main><%- body %></main>
+    <style>
+      @keyframes slidein {
+        0% {
+          color: black;
+        }
+
+        50% {
+          color: red;
+        }
+
+        100% {
+          color: black;
+        }
+      }
+
+      #separator {
+        animation: 1s infinite ease-in-out slidein;
+      }
+    </style>
+    <script>
+      var hours = ("0" + new Date().getHours()).slice(-2);
+      var minutes = ("0" + new Date().getMinutes()).slice(-2);
+      document.querySelector(".status #hours").innerHTML = hours;
+      document.querySelector(".status #minutes").innerHTML = minutes;
+    </script>
   </body>
 </html>

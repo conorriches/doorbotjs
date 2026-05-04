@@ -18,7 +18,7 @@ import {
 } from "./monitoring.js";
 
 const { version } = JSON.parse(readFileSync(new URL("../package.json", import.meta.url)));
-const port = 3002;
+const port = 3000;
 const app = express();
 
 app.set("views", "webserver/views/");

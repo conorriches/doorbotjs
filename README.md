@@ -38,5 +38,6 @@ Read the [manual](docs/manual.md) for further information.
 ## More reading
 * Check out the [terminology](docs/terminology.md) for the terms used in the code and docs
 * [A wiring diagram](./docs/wiring.md) is provided
-*  A brief introduction to the [code](./docs/code.md) is given
-*  The [manual](docs/manual.md) covers the main things for users
+* A brief introduction to the [code](./docs/code.md) is given
+* The [manual](docs/manual.md) covers the main things for users
+* The proposed monitoring plan is in [docs/monitoring.md](./docs/monitoring.md)

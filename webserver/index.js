@@ -4,11 +4,21 @@ import fileUpload from "express-fileupload";
 import flash from "express-flash-message";
 import session from "express-session";
 import { fileTypeFromBuffer } from "file-type";
+import { readFileSync } from "fs";
 import pm2 from "pm2";
 
 import Logger from "../src/logger.js";
 import { entryCodeExistsInMemberlist } from "../helpers/memberList.js";
-const port = 3000;
+import {
+  MONITORED_PROCESSES,
+  getMembersListStatus,
+  getErrorLogStatus,
+  getPm2Processes,
+  deriveOverallStatus,
+} from "./monitoring.js";
+
+const { version } = JSON.parse(readFileSync(new URL("../package.json", import.meta.url)));
+const port = 3002;
 const app = express();
 
 app.set("views", "webserver/views/");
@@ -17,7 +27,7 @@ app.set("view engine", "ejs");
 app.use(express.static("webserver/public"));
 app.use(partials());
 app.use(express.json());
-app.use(express.urlencoded());
+app.use(express.urlencoded({ extended: false }));
 app.use(fileUpload());
 app.use(
   session({
@@ -47,33 +57,66 @@ app.get("/", (req, res) => {
   res.render("index", locals);
 });
 
-app.get("/admin", (req, res) => {
-  let accessRunning = false;
-  let connected = false;
-  let hasError = false;
+app.get("/admin", async (req, res) => {
+  const { connected, processes } = await getPm2Processes(pm2);
+  const access = processes?.access;
+  const accessRunning =
+    connected &&
+    access?.status === "online" &&
+    access?.uptime > 10000;
 
-  pm2.connect(function (err) {
-    if (err) {
-      console.error(err);
-      process.exit(2);
-    }
+  res.render("admin", { menu: "admin", connected, accessRunning, hasError: false });
+});
 
-    connected = true;
+app.get("/healthz", (req, res) => {
+  res.status(200).json({ status: "ok" });
+});
 
-    pm2.describe("access", function (err, processes) {
-      accessRunning =
-        processes[0].pm2_env.status === "online" &&
-        Date.now() - processes[0].pm2_env.pm_uptime > 10000;
+app.get("/status", async (req, res) => {
+  try {
+    const [pm2Result, membersStatus, ...errorLogs] = await Promise.all([
+      getPm2Processes(pm2),
+      getMembersListStatus(),
+      ...MONITORED_PROCESSES.map((name) => getErrorLogStatus(name)),
+    ]);
 
-      const locals = {
-        menu: "admin",
-        connected,
-        accessRunning,
-        hasError,
-      };
-      res.render("admin", locals);
+    const errorLogsByProcess = Object.fromEntries(
+      MONITORED_PROCESSES.map((name, i) => [name, errorLogs[i]])
+    );
+
+    const accessStatus = pm2Result.processes?.access?.status ?? "not_found";
+    const overall = deriveOverallStatus({
+      accessStatus,
+      membersStatus,
+      errorLogs: errorLogsByProcess,
     });
-  });
+
+    const body = {
+      statusVersion: "1.0",
+      generatedAt: new Date().toISOString(),
+      source: "doorbot",
+      overall,
+      processes: pm2Result.processes,
+      membersList: {
+        present: membersStatus.present,
+        fresh: membersStatus.fresh,
+        empty: membersStatus.empty,
+        count: membersStatus.count,
+        ageHours: membersStatus.ageHours,
+        maxAgeHours: membersStatus.maxAgeHours,
+      },
+      errorLogs: errorLogsByProcess,
+      extensions: {
+        version,
+        uptime: process.uptime(),
+        pm2Connected: pm2Result.connected,
+      },
+    };
+
+    res.status(overall.status === "fail" ? 503 : 200).json(body);
+  } catch (e) {
+    res.status(500).json({ status: "error", message: e.message });
+  }
 });
 
 app.get("/sounds", (req, res) => {
@@ -151,5 +194,5 @@ app.post("/sounds", (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`);
+  console.log(`Webserver listening on port ${port}`);
 });

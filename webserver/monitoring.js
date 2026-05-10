@@ -4,6 +4,7 @@ import { parse } from "csv-parse/sync";
 const HOUR = 1000 * 60 * 60;
 const MEMBER_LIST_MAX_AGE_HOURS = 6;
 const MEMBER_LIST_MIN_BYTES = 50;
+const LAST_ACTIVITY_FILE = "./logs/last_activity_timestamp.json";
 
 export const MONITORED_PROCESSES = [
   "access",
@@ -59,6 +60,16 @@ export async function getMembersListStatus() {
   }
 }
 
+export async function getLastMemberActivityTimestamp() {
+  try {
+    const content = await fs.readFile(LAST_ACTIVITY_FILE, "utf-8");
+    const data = JSON.parse(content);
+    return data.timestamp || null;
+  } catch {
+    return null;
+  }
+}
+
 export async function getErrorLogStatus(processName) {
   try {
     const stat = await fs.stat(`logs/error/${processName}.log`);
@@ -107,6 +118,16 @@ export function getPm2Processes(pm2) {
       });
     });
   });
+}
+
+export async function recordMemberActivity() {
+  try {
+    const data = { timestamp: Date.now() };
+    await fs.writeFile(LAST_ACTIVITY_FILE, JSON.stringify(data), "utf-8");
+  } catch (e) {
+    // Silently fail — don't crash access on a write error
+    console.error("Failed to write last activity timestamp:", e.message);
+  }
 }
 
 export function deriveOverallStatus({ accessStatus, membersStatus, errorLogs }) {

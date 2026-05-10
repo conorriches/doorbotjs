@@ -20,6 +20,7 @@ import Telegram from "./src/telegram.js";
 import TimedOutput from "./src/timed_output.js";
 import Wiegand from "./src/wiegand.js";
 import EmergencyCode from "./src/emergency_code.js";
+import { recordMemberActivity } from "./webserver/monitoring.js";
 
 /**
  * Pin Numbers!
@@ -190,6 +191,12 @@ const validate = ({ entryCode, isKeycode, isSilent = false }) => {
         input: memberRecord.memberCodeId,
         memberID: memberRecord.memberId,
       });
+      
+      // Record member activity timestamp
+      recordMemberActivity().catch((e) => {
+        logger.error({ action: "ACTIVITY_LOG_ERROR", message: e.message });
+      });
+      
       grantEntry();
 
       lcdDisplay.welcomeMember(memberRecord.announceName);
@@ -228,6 +235,12 @@ const validate = ({ entryCode, isKeycode, isSilent = false }) => {
             action: "EMERGENCY_ENTRY",
             message: `Emergency entry code from ${entryDevice}, unlocking door`,
           });
+          
+          // Record member activity timestamp
+          recordMemberActivity().catch((e) => {
+            logger.error({ action: "ACTIVITY_LOG_ERROR", message: e.message });
+          });
+          
           grantEntry();
 
           telegram.announceEmergencyEntry();

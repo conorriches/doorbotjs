@@ -12,6 +12,7 @@ import { entryCodeExistsInMemberlist } from "../helpers/memberList.js";
 import {
   MONITORED_PROCESSES,
   getMembersListStatus,
+  getLastMemberActivityTimestamp,
   getErrorLogStatus,
   getPm2Processes,
   deriveOverallStatus,
@@ -74,9 +75,10 @@ app.get("/healthz", (req, res) => {
 
 app.get("/status", async (req, res) => {
   try {
-    const [pm2Result, membersStatus, ...errorLogs] = await Promise.all([
+    const [pm2Result, membersStatus, lastActivityTimestamp, ...errorLogs] = await Promise.all([
       getPm2Processes(pm2),
       getMembersListStatus(),
+      getLastMemberActivityTimestamp(),
       ...MONITORED_PROCESSES.map((name) => getErrorLogStatus(name)),
     ]);
 
@@ -104,6 +106,7 @@ app.get("/status", async (req, res) => {
         count: membersStatus.count,
         ageHours: membersStatus.ageHours,
         maxAgeHours: membersStatus.maxAgeHours,
+        lastActivityTimestamp,
       },
       errorLogs: errorLogsByProcess,
       extensions: {
@@ -117,7 +120,7 @@ app.get("/status", async (req, res) => {
   } catch (e) {
     res.status(500).json({ status: "error", message: e.message });
   }
-});
+})
 
 app.get("/sounds", (req, res) => {
   const locals = {

@@ -9,7 +9,7 @@ export default class Lcd {
   constructor() {
     try {
       this.lcd = new LCD(1, 0x27, 16, 2);
-      this.checkConnected();
+      this.checkConnected().catch(() => {});
 
       this.showMessage({
         line1: "HELLO WORLD",
@@ -63,62 +63,70 @@ export default class Lcd {
   }
 
   setErrorType(errorType = "") {
-    this.checkConnected().then(() => {
-      this.errorType = errorType;
-      this.showDefaultScreen();
-    });
+    this.checkConnected()
+      .then(() => {
+        this.errorType = errorType;
+        this.showDefaultScreen();
+      })
+      .catch(() => {});
   }
 
   showMessage({ line1 = "", line2 = "", duration = 20000 }) {
-    this.checkConnected().then(() => {
-      clearTimeout(this.timeout);
+    this.checkConnected()
+      .then(() => {
+        clearTimeout(this.timeout);
 
-      this.lcd.clearSync();
-      this.lcd.printLineSync(0, line1);
-      this.lcd.printLineSync(1, line2);
-      this.lcd.displaySync();
+        this.lcd.clearSync();
+        this.lcd.printLineSync(0, line1);
+        this.lcd.printLineSync(1, line2);
+        this.lcd.displaySync();
 
-      this.timeout = setTimeout(() => {
-        this.timeout = 0;
-        this.showDefaultScreen();
-      }, duration);
-    });
+        this.timeout = setTimeout(() => {
+          this.timeout = 0;
+          this.showDefaultScreen();
+        }, duration);
+      })
+      .catch(() => {});
   }
 
   welcomeMember(announceName) {
-    this.checkConnected().then(() => {
-      const greetings = ["Howdy", "Hello", "Heya", "Hi", "Greeting", "Welcome"];
-      this.showMessage({
-        line1: greetings[Math.floor(Math.random() * greetings.length)] + ",",
-        line2: announceName,
-      });
-    });
+    this.checkConnected()
+      .then(() => {
+        const greetings = ["Howdy", "Hello", "Heya", "Hi", "Greeting", "Welcome"];
+        this.showMessage({
+          line1: greetings[Math.floor(Math.random() * greetings.length)] + ",",
+          line2: announceName,
+        });
+      })
+      .catch(() => {});
   }
 
   showDefaultScreen() {
-    this.checkConnected().then(() => {
-      // Don't interrupt a message being shown
-      if (this.timeout) return;
+    this.checkConnected()
+      .then(() => {
+        // Don't interrupt a message being shown
+        if (this.timeout) return;
 
-      this.lcd.clearSync();
-      if (this.errorType) {
-        switch (this.errorType) {
-          case this.ERR_LOG_FILE:
-            this.lcd.printLineSync(0, "Errors logged");
-            this.lcd.printLineSync(1, "Exec pm2 logs");
-            break;
-          case this.ERR_OLD_MEMBER_LIST:
-            this.lcd.printLineSync(0, "Old member list");
-            this.lcd.printLineSync(1, "Check internet");
-            break;
-          default:
-            this.lcd.printLineSync(0, "Error occurred:");
-            this.lcd.printLineSync(1, this.errorType);
+        this.lcd.clearSync();
+        if (this.errorType) {
+          switch (this.errorType) {
+            case this.ERR_LOG_FILE:
+              this.lcd.printLineSync(0, "Errors logged");
+              this.lcd.printLineSync(1, "Exec pm2 logs");
+              break;
+            case this.ERR_OLD_MEMBER_LIST:
+              this.lcd.printLineSync(0, "Old member list");
+              this.lcd.printLineSync(1, "Check internet");
+              break;
+            default:
+              this.lcd.printLineSync(0, "Error occurred:");
+              this.lcd.printLineSync(1, this.errorType);
+          }
+          this.lcd.display();
+        } else {
+          this.lcd.noDisplay();
         }
-        this.lcd.display();
-      } else {
-        this.lcd.noDisplay();
-      }
-    });
+      })
+      .catch(() => {});
   }
 }

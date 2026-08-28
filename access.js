@@ -27,21 +27,27 @@ import { recordMemberActivity } from "./webserver/monitoring.js";
  * Specify here where each thing is connected to - uses BCM mode
  */
 
+// On Raspberry Pi OS Bookworm (kernel 6.6+), the SoC's GPIO chip is no longer
+// gpiochip0 - extra chips get registered first, so it shows up as gpiochip512
+// instead. The onoff library exports pins by their global /sys/class/gpio
+// number, so every BCM pin number below needs this base added.
+const GPIO_CHIP_BASE = 512;
+
 // Fob Reader - the Wiegand library
-const p_rfid_d0 = 4;
-const p_rfid_d1 = 17;
-const p_rfid_beep = 24; // This beeper is loud but can't be used in short bursts
-const p_rfid_led = 25; // Inbuilt fob reader LED. Red when low, Green when high.
+const p_rfid_d0 = GPIO_CHIP_BASE + 4;
+const p_rfid_d1 = GPIO_CHIP_BASE + 17;
+const p_rfid_beep = GPIO_CHIP_BASE + 24; // This beeper is loud but can't be used in short bursts
+const p_rfid_led = GPIO_CHIP_BASE + 25; // Inbuilt fob reader LED. Red when low, Green when high.
 
 // Auxiliary
-const p_relay_1 = 8; // To gate lock (short release)
-const p_relay_2 = 9; // To strike lock (long release) (for future)
-const p_input_doorbell = 23;
-const p_input_rex = 27; // Request To Exit
+const p_relay_1 = GPIO_CHIP_BASE + 8; // To gate lock (short release)
+const p_relay_2 = GPIO_CHIP_BASE + 9; // To strike lock (long release) (for future)
+const p_input_doorbell = GPIO_CHIP_BASE + 23;
+const p_input_rex = GPIO_CHIP_BASE + 27; // Request To Exit
 
 // Led status
-const p_led_error = 5;
-const p_led_run = 7;
+const p_led_error = GPIO_CHIP_BASE + 5;
+const p_led_run = GPIO_CHIP_BASE + 7;
 
 /**
  * System variables

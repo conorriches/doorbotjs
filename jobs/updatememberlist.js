@@ -7,6 +7,7 @@ import axios from "axios";
 const logger = new Logger({ process: "updatememberlist" });
 const tempFile = "temp/members.csv";
 const membersFile = "members.csv";
+const stagingFile = "members.csv.tmp";
 const key = config.get("members.querykey");
 
 /**
@@ -67,13 +68,25 @@ const verifyFile = () => {
         return;
       }
 
-      fs.writeFile(membersFile, data, (err) => {
+      // Write alongside the live file then rename over it, so readers
+      // (access.js, /status) never see a truncated or half-written list.
+      fs.writeFile(stagingFile, data, (err) => {
         if (err) {
           logger.info({
             action: "WRITE",
             message: "Error writing new members file",
           });
+          return;
         }
+
+        fs.rename(stagingFile, membersFile, (err) => {
+          if (err) {
+            logger.info({
+              action: "WRITE",
+              message: `Error replacing members file: ${err}`,
+            });
+          }
+        });
       });
     });
   });

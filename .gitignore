@@ -4,5 +4,6 @@ config
 logs
 package-lock.json
 members.csv
+members.csv.tmp
 sounds/custom
 src/emergency_codes.csv
